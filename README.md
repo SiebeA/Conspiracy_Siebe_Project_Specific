@@ -7,4 +7,4 @@ Info on the files within the repository:
     - As a whole, this comprises the TextClassification_pipeline by which the baseline is set
   - the files under the 'readme file' are for feature_engineering; eventually, these models will also be input in the TextPipeline from step 3 (GridsearchCV) onwards: then the results can be compared and the Research Question: 
     - "Can the use of external data improve the performance of a text classification model for detecting conspiratorial video transcripts on a small unbalanced dataset?" 
-  can be answered, as the model includes a external dataset, by which the original features are enriched. 
+  - can be answered, as the model includes a external dataset, by which the original features are enriched. 
