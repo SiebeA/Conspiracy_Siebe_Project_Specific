@@ -1,19 +1,18 @@
-# test
+
+
 #======================================================================== #
 ' 1.1 import df1: dup df: transcripts, labels (and lengths words       '
 #======================================================================== #
 
-
-
-
-
 # import the json file containing file were duplicatives already are taken care of
 import pandas as pd
-df1_NoDuplicatives = pd.read_json('dict1_NoDuplicatives.json')
+df1_NoDuplicatives = pd.read_json('df1_NoDuplicatives.json')
 #reset index so that the old-duplicates-indices are dealt with:
 df1_NoDuplicatives = df1_NoDuplicatives.reset_index() #could drop it with: drop=True
 #setting column names:
 df1_NoDuplicatives.columns = ['ids', 'transcripts', 'labels', 'wordLengths']
+
+
 
 # =============================================================================
 # robustnss checking
@@ -90,12 +89,19 @@ print('[soft music]' in str(x) ) # just to check 1.2
 
 df3_consOnly    = df3_binarizedLabelsψlenAdjusted[df3_binarizedLabelsψlenAdjusted.labels==2]
 x_consOnly      = list(df3_consOnly.transcripts)
-y_consOnly      = list(df3_consOnly.labels)
+#y_consOnly      = list(df3_consOnly.labels) # necessary?
     
 df3_nonConsOnly = df3_binarizedLabelsψlenAdjusted[df3_binarizedLabelsψlenAdjusted.labels==1]
 x_nonConsOnly   = list(df3_nonConsOnly.transcripts)
-y_nonConsOnly   = list(df3_nonConsOnly.labels)
+#y_nonConsOnly   = list(df3_nonConsOnly.labels)
 
 
-#RC:
-#list( df3_binarizedLAbelsψlenAdjusted.labels ) == 
+#======================================================================== #
+' Saving to disk                          '
+#======================================================================== #
+
+import pickle
+with open('output_1_importψpreprocess;xyψdf3binarizedLenadjustedψxcons,noncons.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+    pickle.dump([x,y,df3_binarizedLabelsψlenAdjusted,x_consOnly,x_nonConsOnly], f)
+
+
