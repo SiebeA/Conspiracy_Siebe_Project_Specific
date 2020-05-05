@@ -146,4 +146,3 @@ len( df_origin_criteriums[df_origin_criteriums['length'].between(100, 200)] )
 ##with open("output_file.txt", "w") as output:
 ##    for I in a_external_corpus:
 ##        output.writelines("starttt\n"+str(I)+"\nenddd\n\n\n")
-#        
