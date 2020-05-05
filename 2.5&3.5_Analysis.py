@@ -146,4 +146,4 @@ df4_x_vectorized.columns.get_loc('bill')
 #print('\n respecively for the classes:',mnb_model.classes_)
 ## use the EXP (invese log / euler) to convert the log back to probabilities:
 
-#
+
