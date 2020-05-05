@@ -9,7 +9,7 @@ Info on the files within the repository:
 | -------------                     |:-------------:|
 | 1_Import+Preprocess.py            |done  | 
 | 2.0_vectorization_BOW&split.py    |Gridsearch-system=setup: Hyperparamaters can be optimzed even more  | 
-| 2.5_Analysis.py                   | not relevant     |
+| 2.5_Analysis.py                   | not relevant for end-result; but I use it for EDA & observing the results of changes in HyperParamaters     |
 | 3_GridsearchCV.py                 | Gridsearch-system=setup: Hyperparamaters of baseline classifier can be optimzed even more  |
 | FE1_RedditCorpus                  | 40k reddit comments are scraped, from which feature can be extracted (looking into possibility to use googleBigquery to download an even bigger dataset)
 | FE2_FeatureEnrichment             | Working on it; vectorization&classifier Hyperparamaters (can(and ought!) be easily extended here|
