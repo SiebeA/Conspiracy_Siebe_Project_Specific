@@ -12,5 +12,6 @@ Info on the files within the repository:
 | 1_Import+Preprocess.py     |yes  | 
 | 2.0_vectorization_BOW&split.py    |Gridsearch-system=setup: Hyperparamaters can be optimzed even more  | 
 | 2.5_Analysis.py| not relevant     |
-| 3_GridsearchCV.py  | Gridsearch-system=setup: Hyperparamaters of classifier can be optimzed even more      |
-| FeatureEnrichment  | Working on it     |
+| 3_GridsearchCV.py  | Gridsearch-system=setup: Hyperparamaters of baseline classifier can be optimzed even more  |
+| FE1_RedditCorpus    | 40k reddit comments are scraped, from which feature can be extracted (looking into possibility to use googleBigquery to download an even bigger dataset)
+| FE2_FeatureEnrichment  | Working on it; vectorization&classifier Hyperparamaters (can(and ought!) be easily extended here|
