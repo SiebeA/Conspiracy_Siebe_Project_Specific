@@ -240,8 +240,3 @@ for TERM in df:
                 print(f'TERM:{TERM} \n NEIGHBOR:{NEIGHBOR[0]}')
                 print('\n',df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1,'\n')
                 
-                
-model.similar_by_word('ritual', topn= 25)
-
-transcript1 = 'rituals bla bla bla'
-transcript2 = ''
