@@ -133,7 +133,7 @@ import numpy as np
 # =============================================================================
 from sklearn.naive_bayes import MultinomialNB
 #mnb_model=MultinomialNB() # ~==↓
-mnb_model= MultinomialNB(alpha= 0.1, fit_prior = True, class_prior = (0.5,0.5) ) # apt the order of which class_prior paramters, are the order of: mnb_model.classes_
+mnb_model= MultinomialNB(alpha= 1, fit_prior = True, class_prior = (0.5,0.5) ) # apt the order of which class_prior paramters, are the order of: mnb_model.classes_
 
 
 print (f'\n mnb_model.class_prior is specified as: {mnb_model.class_prior}... ') # this works before fitting
@@ -187,15 +187,20 @@ construct new BOW vector where neigbors are +1, other terms untouched →
 # =============================================================================
 #creating some test/newData: this doc = True chinese
 test1 = ['wuhan nanjing japan'  ]    # out of vocab *2 + invocab
-test2 = ['beijing nanjing japan']    # rare + outofvocab + invocab
+test2 = ['beijing beijing chinese japan']    # rare + outofvocab + invocab
 
-χTest = vectorizer.transform(test1).toarray()
+xTest = vectorizer.transform(test2).toarray()
 
-ŷ = mnb_model.predict(χTest) #  the predicted class
+ŷ = mnb_model.predict(xTest) #  the predicted class
 print(ŷ)
-ŷ_probability = mnb_model.predict_proba(χTest)
+ŷ_probability = mnb_model.predict_proba(xTest)
 print(ŷ_probability)
+print ('\n with the para:', mnb_model)
 
+
+CHI = 0.09*2 * 0.09*2 *0.5
+JAP = 0.03*2 * 0.31*2 * 0.5
+1/(JAP/CHI)
 #i.e. terms that do not occur in the (training)vocab are discarded by the classifier
 
 model.similar_by_word('nanjing', topn= 25) 
@@ -222,18 +227,21 @@ for TERM in test1:
 # ============================================================================
 
 df = termsψcoefsψcountvaluesψconditionalProbs.iloc[1:5] # some convenience for reference
-
+# the loop that 1. identifies 'N' 2. identifies 'K' 3. manipulate 'K' Neighbors in Doc_of_'N' 
 for TERM in df:
-#    print(f'nr of >=1 occurences of "{TERM}" in the corpus:', np.count_nonzero(df[TERM]))
-    
-    if np.count_nonzero(df[TERM]) == 1:#SET RARE-WORD HYPERPARAMATER
-        print(f'{TERM} satisfies the "rare word paramater"')
-        for NEIGHBOR in model.similar_by_word(TERM, topn= 25): #SET NEIGHBOR HYPERPARAMATER
+    if np.count_nonzero(df[TERM]) <= 1:#SET 'N' RARE-WORD HYPERPARAMATER
+        print(f'\n "{TERM}" satisfies the "rare word paramater"')
+        print(f'the rare TERM: "{TERM}" occurred in Doc index:',np.where((df[TERM] >0) & (df[TERM]<=1 ))[0][0])
+        
+        for NEIGHBOR in model.similar_by_word(TERM, topn= 25): #SET 'K' NEIGHBORs HYPERPARAMATER
     #        print(f'{NEIGHBOR[0]}')
-    
+                        #[0] = TERM; [1]
             if NEIGHBOR[0] in termsψcoefsψcountvaluesψconditionalProbs.columns:
-                print(f'\nTERM:{TERM} \n\n NEIGHBOR:{NEIGHBOR[0]}')
-                print( df[NEIGHBOR[0]] ) # TBD; I have to locate THE ROW where the nonzero value is and then update the terms with +1 that are neighbors IN THE ROW WHERE THAT NONZERO VALUE APPEARS
+                print(f'TERM:{TERM} \n NEIGHBOR:{NEIGHBOR[0]}')
+                print('\n',df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1,'\n')
+                
+                
+model.similar_by_word('ritual', topn= 25)
 
-model.similar_by_word('beijing', topn= 25)
-
+transcript1 = 'rituals bla bla bla'
+transcript2 = ''
