@@ -1,32 +1,33 @@
-#import warnings
-#warnings.filterwarnings("ignore")
-
-# =============================================================================
-# Importing libraries
-# =============================================================================
-#nlp essentials:
-import spacy
-import en_core_web_sm # the english spacy core (sm = small database)
-# for installing spacy & en_core; https://spacy.io/usage
-
-# wordvec (GloVe) model:
-import numpy as np
-#%matplotlib notebook
-import matplotlib.pyplot as plt
-plt.style.use('ggplot')
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
-from gensim.test.utils import datapath, get_tmpfile
-from gensim.models import KeyedVectors
-from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014; 400kTerms
-
-#loading the word vectors
-GLOVE_FILE = datapath("C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.300d.txt")
-WORD2VEC_GLOVE_FILE = get_tmpfile("glove.6B.300d.txt") # specify which d file is used here
-glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
-
-#model:
-model = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
+##import warnings
+##warnings.filterwarnings("ignore")
+##
+## =============================================================================
+## Importing libraries
+## =============================================================================
+##nlp essentials:
+#
+#import spacy
+#import en_core_web_sm # the english spacy core (sm = small database)
+## for installing spacy & en_core; https://spacy.io/usage
+#
+## wordvec (GloVe) model:
+#import numpy as np
+##%matplotlib notebook
+#import matplotlib.pyplot as plt
+#plt.style.use('ggplot')
+#from sklearn.manifold import TSNE
+#from sklearn.decomposition import PCA
+#from gensim.test.utils import datapath, get_tmpfile
+#from gensim.models import KeyedVectors
+#from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014; 400kTerms
+#
+##loading the word vectors
+#GLOVE_FILE = datapath("C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.300d.txt")
+#WORD2VEC_GLOVE_FILE = get_tmpfile("glove.6B.300d.txt") # specify which d file is used here
+#glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
+#
+##model:
+#model = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
 
 
 # ***run from here, information for understanding is provided in the print commands ***
@@ -34,16 +35,17 @@ model = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
 #======================================================================== #
 ''' 3 Creating the toy corpus    '''
 #======================================================================== #
-STRING = '''chinese beijing chinese
+STRING = '''chinese beijing
 chinese chinese shanghai macao tokyo
 chinese macao japan shanghai
-tokyo japan chinese'''
-# obervation: Macau in doc 3 is the most informative word IDF
+tokyo japan chinese
+japan tokyo hiroshima hiroshima '''
+# side-obervation: Macau in doc 3 is the most informative word IDF
 
 
 #define labels because I want to add them to the df
 γTrain = ['chinese' , 'chinese' ,'chinese' , 'japanese']
-
+    
 #STRING2 = '''I've been to Hollywood and redwood
 #I've been to Redwood
 #I've been a miner for a heart of gold'''
@@ -104,7 +106,7 @@ print(f'size of Vocabulary = {len(Terms)}\n')
 # terms+TFIDF in df:
 import pandas as pd
 
-TermsψcountValues = pd.DataFrame(Tdm_array,columns=Terms,index=['doc1(chi) WC:','doc2(chi) WC:','doc3(chi) WC:','doc4(jap) WC:']) #deprecated, further along the script you have: 
+TermsψcountValues = pd.DataFrame(Tdm_array,columns=Terms,index=['doc0(chi) WC:','doc1(chi) WC:','doc2(chi) WC:','doc3(jap) WC:','doc4(jap) WC:']) #deprecated, further along the script you have: 
 
 
 
@@ -133,7 +135,7 @@ import numpy as np
 # =============================================================================
 from sklearn.naive_bayes import MultinomialNB
 #mnb_model=MultinomialNB() # ~==↓
-mnb_model= MultinomialNB(alpha= 1, fit_prior = True, class_prior = (0.5,0.5) ) # apt the order of which class_prior paramters, are the order of: mnb_model.classes_
+mnb_model= MultinomialNB(alpha= 0.1, fit_prior = True, class_prior = (0.5,0.5) ) # apt the order of which class_prior paramters, are the order of: mnb_model.classes_
 
 
 print (f'\n mnb_model.class_prior is specified as: {mnb_model.class_prior}... ') # this works before fitting
@@ -174,9 +176,7 @@ print(termsψcoefsψcountvaluesψconditionalProbs, '\n\n ↑termsψcoefsψcountv
 'Recreating HEAP METHOD for Enriching BOW        '
 #======================================================================== #
 
-# =============================================================================
-# FOR THE 'OUT-OF-VOCABULARY' WORDS FIRST
-# =============================================================================
+
 '''                 Description of method:
 test data →→→ 
 wordVec model finds neighbors if term in testset is Rare⊃outOfVocab → 
@@ -186,29 +186,32 @@ construct new BOW vector where neigbors are +1, other terms untouched →
 # Scenario in which the baseline model is used: no intermediate wordvector model:
 # =============================================================================
 #creating some test/newData: this doc = True chinese
-test1 = ['wuhan nanjing japan'  ]    # out of vocab *2 + invocab
-test2 = ['beijing beijing chinese japan']    # rare + outofvocab + invocab
+#outVocab_test = ['wuhan nanjing japan'  ]    # out of vocab *2 + invocab
+rareVocab_test = ['beijing chinese shanghai tokyo japan']    # rare + outofvocab + invocab
+# SO IF THIS TEST-VECTOR INCLUDING BEIJING, WHICH HAS NEIGHBOR: 'SHANGHAI' IS ENRICHED WITH SHANGHAI; IT WLL BE HEAVILY PROBABILITIZED TOWARDS CLASS=CHINESE; DOES THAT SEEM JUSTIFIED?:
+    # IF EG SHANGHAI IS NOT PRESENT IN THE TEST_VECTOR, AND THAT TERM IS VERY CLOSE TO A TERM IN THE  TEST SET THAT IS A RARE TERM FOR THAT CLASS THUS COUNTING LITTLE TOWARDS THE PROBABILITY TOWARDS THAT CLASS; ONE COULD SAY THAT IN ACTUALITY THAT TERM IS SORT OF A PLACEHOLDER FOR THE NEIGHBORING=SIMILAR TERM THAT DOES OCCUR MANY TIMES IN THAT CLASS, LITTLE IN OPPOSING CLASS THEREFORE PROVIDING A LOT OF EVIDENCE FOR THE TEST-TEXT BEING CLASSIFIED AS THAT CLASS
+    # EXPLANATION WH IT MATTERS FOR OUTCOME: tHE MORE COMMON SHANGHAI IS IN CHINESE CLASSES |\ MORE RARE IN JAPANESE CLASSES; THE HIGHER THE LIKELIHOOD FOR CLASS CHINESE &_BY_DEF?: THE LOWER THE LIKELIHOOD FOR CLASS JAPANUSE →→→ HENCE THE GREATER THE "PROBABILITY GAP" BETWEEN THAT WORD COUNTING TOWARDS CHINESE VS JAPANESE
 
-xTest = vectorizer.transform(test2).toarray()
+xTest = vectorizer.transform(rareVocab_test).toarray()
 
 ŷ = mnb_model.predict(xTest) #  the predicted class
 print(ŷ)
 ŷ_probability = mnb_model.predict_proba(xTest)
 print(ŷ_probability)
 print ('\n with the para:', mnb_model)
-
-
-CHI = 0.09*2 * 0.09*2 *0.5
-JAP = 0.03*2 * 0.31*2 * 0.5
-1/(JAP/CHI)
 #i.e. terms that do not occur in the (training)vocab are discarded by the classifier
 
-model.similar_by_word('nanjing', topn= 25) 
+
+#!!! =============================================================================
+# for the 'out-of-vocabulary' words first ; THINK I CAN JUST MERGE THIS WITH RARE WORDS
+# =============================================================================
+
+model.similar_by_word('beijing', topn= 25) 
 
 
 neighborOfTestsetToken_inVocab = []
 #see if a term in the test set is in or out vocab
-for TERM in test1:
+for TERM in outVocab_test:
     for TERM in TERM.split():
         if TERM in termsψcoefsψcountvaluesψconditionalProbs.columns:
             print(f'\n\n the following TERM IS present in the trainingVocab:',TERM)
@@ -221,12 +224,10 @@ for TERM in test1:
                     print(f'"{NEIGHBOR[0]}" as a neighbor of "{TERM}" is in the building')
                     neighborOfTestsetToken_inVocab.append(NEIGHBOR[0])
 
+#TBD; from searching terms in char form; search them in vector form:
 
-# =============================================================================
-# FOR THE Rare words
-# ============================================================================
-
-df = termsψcoefsψcountvaluesψconditionalProbs.iloc[1:5] # some convenience for reference
+#copied this from before training section:
+df = pd.DataFrame(xTest, columns= vectorizer.get_feature_names())
 # the loop that 1. identifies 'N' 2. identifies 'K' 3. manipulate 'K' Neighbors in Doc_of_'N' 
 for TERM in df:
     if np.count_nonzero(df[TERM]) <= 1:#SET 'N' RARE-WORD HYPERPARAMATER
@@ -239,9 +240,55 @@ for TERM in df:
             if NEIGHBOR[0] in termsψcoefsψcountvaluesψconditionalProbs.columns:
                 print(f'TERM:{TERM} \n NEIGHBOR:{NEIGHBOR[0]}')
                 print('\n',df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1,'\n')
-                
-                
-model.similar_by_word('ritual', topn= 25)
+                    
 
-transcript1 = 'rituals bla bla bla'
-transcript2 = ''
+
+# !!!=============================================================================
+# FOR THE Rare words
+# ============================================================================
+
+
+#DONT THINK I NEED THIS:
+#df = termsψcoefsψcountvaluesψconditionalProbs.iloc[1:6] # some convenience for reference
+# the loop that 1. identifies 'N' 2. identifies 'K' 3. manipulate 'K' Neighbors in Doc_of_'N' 
+
+
+# PROTOTYPE 1
+for TERM in df_test:
+    if np.count_nonzero(df[TERM]) <= 1:#SET 'N' RARE-WORD HYPERPARAMATER
+        print(f'\n "{TERM}" satisfies the "rare word paramater"')
+        print(f'the rare TERM: "{TERM}" occurred in Doc index:',np.where((df[TERM] >0) & (df[TERM]<=1 ))[0])
+        
+        for NEIGHBOR in model.similar_by_word(TERM, topn= 25): #SET 'K' NEIGHBORs HYPERPARAMATER
+    #        print(f'{NEIGHBOR[0]}')
+                        #[0] = TERM; [1]
+            if NEIGHBOR[0] in termsψcoefsψcountvaluesψconditionalProbs.columns:
+                print(f'TERM:{TERM} \n NEIGHBOR:{NEIGHBOR[0]}')
+                
+                df_enriched = df_test.replace(df_test, 0)
+                df_enriched = df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1
+                
+                print('\n',df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1,'\n')
+   
+df_test = pd.DataFrame(xTest,columns=vectorizer.get_feature_names())
+
+
+
+#PROTOTYPE 2
+for TERM in df_test:
+    if np.count_nonzero(df[TERM]) <= 1:#SET 'N' RARE-WORD HYPERPARAMATER
+        print(f'\n "{TERM}" satisfies the "rare word paramater"')
+        print(f'the rare TERM: "{TERM}" occurred in Doc index:',np.where((df[TERM] >0) & (df[TERM]<=1 ))[0])
+        
+        for NEIGHBOR in model.similar_by_word(TERM, topn= 25): #SET 'K' NEIGHBORs HYPERPARAMATER
+    #        print(f'{NEIGHBOR[0]}')
+                        #[0] = TERM; [1]
+            if NEIGHBOR[0] in termsψcoefsψcountvaluesψconditionalProbs.columns:
+                print(f'TERM:{TERM} \n NEIGHBOR:{NEIGHBOR[0]}')
+                
+                df_enriched = df_test.replace(df_test, 0)
+                df_enriched = df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1
+                
+                print('\n',df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1,'\n')
+   
+df_test = pd.DataFrame(xTest,columns=vectorizer.get_feature_names())
