@@ -265,6 +265,7 @@ for TERM in df_test:
             if NEIGHBOR[0] in termsψcoefsψcountvaluesψconditionalProbs.columns:
                 print(f'TERM:{TERM} \n NEIGHBOR:{NEIGHBOR[0]}')
                 
+<<<<<<< HEAD:FE2_FeatureEnrichment.py
                 df_enriched = df_test.replace(df_test, 0)
                 df_enriched = df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1
                 
@@ -292,3 +293,5 @@ for TERM in df_test:
                 print('\n',df[NEIGHBOR[0]].iloc[np.where((df[TERM] >0) & (df[TERM]<=1 ))]+1,'\n')
    
 df_test = pd.DataFrame(xTest,columns=vectorizer.get_feature_names())
+=======
+>>>>>>> 8016057df6f02e62ce3554ed9f34b2ca1e7a7831:FE2_FeatureEnrichment; with Rare words before training enrichment.py
