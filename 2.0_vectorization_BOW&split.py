@@ -1,14 +1,16 @@
 #======================================================================== #
 ' import the output of 1_preprocessing        '
 #======================================================================== #
+import numpy as np
 
+#THESE ARE WITH THE LABELS 0-1
 import pickle
-with open('output_1_importψpreprocess;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
-    x, y,df3_binarizedLabelsψlenAdjusted,x_consOnly,x_nonConsOnly = pickle.load(f)
+with open('pickle\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
+    X, Y,DF3_BINARIZEDLABELSΨLENADJUSTED,X_CONSONLY,X_NONCONSONLY = pickle.load(f)
 
 
-print('some checks of former processes outputs; \n -checking some cleaning: term in corpus?: ..:' )
-for I in ['[music]', '[Music]', '[soft music]']:print('term: ',I,'_'*(15-len(I)), I in str(x) )
+print('some checks of cleaning processes outputs; \n -checking some cleaning: term in corpus?: ..:' )
+for I in ['[music]', '[Music]', '[soft music]']:print('term: ',I,'_'*(15-len(I)), I in str(X) )
 
 #======================================================================== #
 ' importing NLP essentials' 'option: cleaning to preprocessing?'
@@ -19,10 +21,10 @@ import en_core_web_sm
 nlp = en_core_web_sm.load(disable=["tagger", "parser", "ner"]) 
 
 nlp.Defaults.stop_words |= {"like","thing",} #'|=' is to add several stopwords at once
-Stopwords_endResult = list(nlp.Defaults.stop_words)
+#Stopwords_endResult = list(nlp.Defaults.stop_words)
 
 #non lemma cleaner:
-def my_cleaner_noLemma(text):
+def my_cleaner_noLemma_noStop(text):
         return[token.lower_ for token in nlp(text) if not (token.is_stop or token.is_alpha==False or len(token.lemma_) <3 ) ] 
 
 #lemmatizing cleaner:
@@ -32,56 +34,89 @@ def my_cleaner_noLemma(text):
 
 #======================================================================== #
 ' BOW Vectorization; for classifiation input                         '
-#======================================================================== #
+#!!!======================================================================== #
 from sklearn.feature_extraction.text import CountVectorizer , TfidfVectorizer
-vectorizer = CountVectorizer(
+vectorizer = TfidfVectorizer(
  ngram_range=(1,1),
- tokenizer=my_cleaner_noLemma,
- max_features=None, #sa note: this is important for my 'rare word frequency threshold'
- max_df = 1.0, #= 0.50 means "ignore terms that appear in more than 50% of the documents".
- min_df = 1,# 1 means "ignore terms that appear in less than 1 document: i.e. not ignoring any terms"
- stop_words=None,
+ tokenizer=my_cleaner_noLemma_noStop,
+ max_features=10000, #sa note: this is important for my 'rare word frequency threshold'
+ max_df = 0.8, #= 0.50 means "ignore terms that appear in more than 50% of the documents".
+ min_df = 1,# 1 means "ignore terms that appear in less than 1 document: i.e. '1' would mean: not ignoring any terms"
+ stop_words=None,#list(nlp.Defaults.stop_words), # max-df can take care of this???
  binary=False,#If True, all non zero counts are set to 1.
 # use_idf= None,
  lowercase=True) #True by default: Convert all characters to lowercase before tokenizing.
 
+    
 #======================================================================== #
 ' TBD: make before after vocabulary; to observe what terms were omitted   !!!        '
 #======================================================================== #
 #fit on the whole corpus (this means that the vocabulary is extracted from the whole corpus)
-vectorizer.fit(x)
+vectorizer.fit(X)
+
 
 #Transform seperately: # DOES NOT SHOW UP IN VARIABLE EXPLORER
-x_vec = vectorizer.transform(x) #whole internal corpus
+x_vec = vectorizer.transform(X) #whole internal corpus
 x_vec_array = x_vec.toarray()
-x_vec_array[:,0].max()
+print( '\nthis many docs and features:', x_vec_array.shape)
+
+
+#ANALYZING , STOP WORDS GOT FLTERED HERE??::
+print('\nand after tokenizing and checking:; \n -checking some cleaning: term in corpus?: ..:' )
+for I in ['[music]', '[Music]', '[soft music]']:print('term: ',I,'_'*(15-len(I)), I in str(X) )
+
+    
 #belongs in 2.5analysis, but put it here for convenience
 import pandas as pd 
 df4_x_vectorized = pd.DataFrame(x_vec_array, columns = vectorizer.get_feature_names())
-# CHECKS to see if they are filled:
-df4_x_vectorized.iloc[:,0].max()
-df4_x_vectorized.aaa.idxmax()
-df4_x_vectorized.iloc[:,0].equals( df4_x_vectorized.aaa)
+df4_x_vectorized.iloc[:,0].max() # CHECKS to see if the df is filled:
+#df4_x_vectorized.aaa.idxmax()
+#df4_x_vectorized.iloc[:,0].equals( df4_x_vectorized.aaa)
 
-print('\n the vectorization paramaters:\n\n---',str(type(vectorizer))[-17:-9],'---') #CHECKS
-for KEY in vectorizer.get_params().keys():print(KEY,'_'*(15-len(KEY)),vectorizer.get_params()[KEY])
+
+
+### some EDA on non-zero term occurences (dup:
+a_nonZero_CountColumnsǀterms = pd.DataFrame(np.count_nonzero(df4_x_vectorized,axis=0),index=vectorizer.get_feature_names(),columns=['nonZeroCounts'])
+#Nonzero == term occurs in this doc: this is handy to determine rare term value
+#THINK THIS IS RELATED TO THE MAX/MIN_DF PARAMATER
+
+#The maximum frequency of term uses 
+RARETERM_HYPERPARA = 400
+len( a_nonZero_CountColumnsǀterms[a_nonZero_CountColumnsǀterms.nonZeroCounts<=RARETERM_HYPERPARA] )
+#THE SAME FOR EITHER TF & IDF (because its non zero)
+
+
+# make a customized dic of params I want to check:
+vectorization_parasFiltered = vectorizer.get_params()
+KEYS_TO_REMOVE = ['binary', 'decode_error' ,'dtype', 'encoding', 'input', 'strip_accents', 'vocabulary', 'analyzer', 'lowercase','norm','sublinear_tf']
+for KEY in KEYS_TO_REMOVE:
+  del vectorization_parasFiltered[KEY]
+
+print('\n the vectorization paramaters:\n\n---',str(type(vectorizer))[-17:-9],'---\n')
+for KEY in vectorization_parasFiltered.keys():print(KEY,'_'*(15-len(KEY)),vectorization_parasFiltered[KEY])
+
+
+
+
+
+
 
 # =============================================================================
 # #saving output to disk; MIGHT NOT BE SOUND, AS THE VECTORIZATION WILL VARY DEPENDING ON PARA CHOICE
 # =============================================================================
-import pickle
-with open('output_2.0)Bow_Vectorizationψinput3.0_CrossValidation.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
-    pickle.dump([y,x_vec, x_vec_array], f)
+#import pickle
+#with open('pickle\output_2.0)Bow_Vectorizationψinput3.0_CrossValidation.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+#    pickle.dump([Y,x_vec, x_vec_array], f)
     
     
 #======================================================================== #
 ' ↓ for analyze purposes     '
 #======================================================================== #
 
-x_nonConsOnly_v = vectorizer.transform(x_nonConsOnly)
+x_nonConsOnly_v = vectorizer.transform(X_NONCONSONLY)
 x_nonConsOnly_array = x_nonConsOnly_v.toarray()
 
-x_consOnly_v    = vectorizer.transform(x_consOnly)
+x_consOnly_v    = vectorizer.transform(X_CONSONLY)
 x_consOnly_array = x_consOnly_v.toarray()
 for I in dir(): print(I) # sparse matrices dont show up in VE, but are in dir..
 print('\n the vectorization paramaters:\n---',str(type(vectorizer))[-17:-9],'---\n')# Checks
@@ -108,13 +143,13 @@ for KEY in vectorizer.get_params().keys():print(KEY,'_'*(15-len(KEY)),vectorizer
 #        ents = [token.label_ for token in doc.ents]
 #        entCountList = Counter(ents)
 #        d = dict(entCountList) #lengthfactor operation does not work othewise
-#        d.update((x, y / lengthFactor) for x, y in d.items()) #normalize for length doc
+#        d.update((X, Y / lengthFactor) for X, Y in d.items()) #normalize for length doc
 #        entsPerDocList.append(d)
 #    return pd.DataFrame( entsPerDocList )
 #
-#ner_x_lenNormalized = NER_df(x).fillna(0)#deal with the Nans
-#ner_cons_lenNormalized = NER_df(x_consOnly).fillna(0)#deal with the Nans
-#ner_nCons_lenNormalized = NER_df(x_nonConsOnly).fillna(0)#deal with the Nans
+#ner_x_lenNormalized = NER_df(X).fillna(0)#deal with the Nans
+#ner_cons_lenNormalized = NER_df(X_CONSONLY).fillna(0)#deal with the Nans
+#ner_nCons_lenNormalized = NER_df(X_NONCONSONLY).fillna(0)#deal with the Nans
 #
 ##create 1 comparison dataframe:
 #import pandas as pd
@@ -138,5 +173,5 @@ for KEY in vectorizer.get_params().keys():print(KEY,'_'*(15-len(KEY)),vectorizer
 #import pandas as pd
 #ner_x_lenNormalized_StandardScaled_df = pd.DataFrame(ner_x_lenNormalized_StandardScaled, columns = ner_x_lenNormalized.columns)
 
-
+'
 
