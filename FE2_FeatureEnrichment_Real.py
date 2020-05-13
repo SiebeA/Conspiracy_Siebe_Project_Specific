@@ -96,7 +96,7 @@ for DOCINDEX in range(len( df_test)): # loops through each of the docs
         print (" %s secs" % round((time.time() - START_TIME),0))
         print(f'len neighbors = {len(NEIGHBORS)}')
     # =============================================================================
-    #                         #↑adding a value that is the product of the similarity score * the value of the TERM in the respective DOC, to the NEIGHBOR of the rare term in the DOC where the rare term occurs: 
+    #        Another hyperpara (line95) (by me, not mentioned in heap_2017): #↑it adds a value that is the product of the similarity score * the value of the TERM in the respective DOC, to the NEIGHBOR of the rare term in the DOC where the rare term occurs: 
     # =============================================================================
     except KeyError:
         print(KeyError, TERM)
