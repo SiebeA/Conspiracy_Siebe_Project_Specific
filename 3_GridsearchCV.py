@@ -7,7 +7,7 @@
 '  split train test '
 #======================================================================== #
 from sklearn.model_selection import train_test_split
-x_train, x_test, y_train, y_test  = train_test_split(x, y, test_size=0.2, random_state=4, shuffle=True, stratify=y)
+x_train, x_test, y_train, y_test  = train_test_split(X, Y, test_size=0.2, random_state=4, shuffle=True, stratify=Y)
 
 #======================================================================== #
 ' gridsearch         '
@@ -24,15 +24,15 @@ mnb_pipeline = Pipeline(
         [('vectorizer', CountVectorizer()),
          ('mnb', MultinomialNB()) ]
         )
-
+# I NEED TO RUN THE MY_CLEANER IN 2.0
 param_grid =  {
-        'vectorizer__max_features':list(range(1000,25000,5000)),
-        'vectorizer__ngram_range': [(1, 1), (1, 2)],
-        'vectorizer__tokenizer': (None, my_cleaner4),
+        'vectorizer__max_features':list(range(1000,25000,5000)),#til 25k steps of 5k
+        'vectorizer__ngram_range': [(1, 1)],#, (1, 2)],
+        'vectorizer__tokenizer': (None, my_cleaner_noLemma_noStop),
         'mnb__alpha':np.linspace(1e-4, 1e0, 2)   #[round( x * 0.1, 2) for x in range(1, 6)]
                 }
 
-gs_mnb = GridSearchCV(mnb_pipeline, param_grid, cv=2, verbose=2,scoring='f1_macro')
+gs_mnb = GridSearchCV(mnb_pipeline, param_grid, cv=2, verbose=2,scoring='f1_macro') #cv = nr of folds
 gs_mnb = gs_mnb.fit(x_train, y_train)
 
 

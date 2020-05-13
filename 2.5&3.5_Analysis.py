@@ -14,9 +14,9 @@ from collections import Counter
 from spacy.lemmatizer import Lemmatizer# to check why eg 'deceit' is not in the dict
 
 
-#creating some clarity:
-X, Y,X_NONCONSONLY,X_CONSONLY = x,y,x_nonConsOnly, x_consOnly
-del x,y,x_nonConsOnly, x_consOnly # just so they dont appear in variable explorer
+##creating some clarity:
+#X, Y,X_NONCONSONLY,X_CONSONLY = x,y,x_nonConsOnly, x_consOnly
+#del x,y,x_nonConsOnly, x_consOnly # just so they dont appear in variable explorer
 
 # =============================================================================
 ' START analysis) Input = "output_1.0_importPreprocessing"   Dataframe of TDM: '
@@ -27,9 +27,9 @@ import pandas as pd
 #Cons only:
 df4_x_vectorized = pd.DataFrame(x_vec_array, columns = vectorizer.get_feature_names())
 
-df4_x_ConsOnly_vectorized = pd.DataFrame(X_CONSONLY.toarray(), columns = vectorizer.get_feature_names())
+df4_x_ConsOnly_vectorized = pd.DataFrame(x_consOnly_array, columns = vectorizer.get_feature_names())
 
-df4_x_nonConsOnly_vectorized = pd.DataFrame(X_NONCONSONLY.toarray(), columns = vectorizer.get_feature_names())
+df4_x_nonConsOnly_vectorized = pd.DataFrame(x_nonConsOnly_array, columns = vectorizer.get_feature_names())
 
 # =============================================================================
 ' analyzing termPresence & Frequencies' #=============================================================================
@@ -38,7 +38,7 @@ termFrequencies_x = df4_x_vectorized.sum().to_dict()
 
 termFrequencies_Cons = df4_x_ConsOnly_vectorized.sum().to_dict()
 # ↑ I doubleChecked (DC), it does show most common words in the corpus (without stopword removal 'the' is 1st): 
-'''the 23684 that 18595 and 18419 -PRON- 15432 you 15126 have 6823 this 6170 like 6158 know 5480 they 4580 what 4329 there 3992 but 3895 for 3510 think 3447 not 3423 people 3401'''
+
 termFrequencies_nonCons = df4_x_nonConsOnly_vectorized.sum().to_dict()
 #check: 0th column: term: '-PRON-' = 5 == 
 
@@ -147,3 +147,4 @@ df4_x_vectorized.columns.get_loc('bill')
 ## use the EXP (invese log / euler) to convert the log back to probabilities:
 
 
+'

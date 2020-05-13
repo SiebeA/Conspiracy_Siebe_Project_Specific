@@ -27,7 +27,7 @@ df1_NoDuplicatives = df1_NoDuplicatives.drop_duplicates()
 # =============================================================================
 Re_matchlist = []
 import re
-Regex = r"\[\w+\]"#this pattern removes tokens sa '[music]' 
+Regex = r"\[[^]]+\]"#this pattern removes tokens sa '[music]' 
 II=0
 for String in df1_NoDuplicatives.transcripts: 
     MATCHLIST = re.findall(Regex, String)
@@ -40,6 +40,10 @@ for String in df1_NoDuplicatives.transcripts:
     Re_matchlist.append((II,MATCHLIST))
     II+=1
 print(Re_matchlist, '\n\n↑ these tokens in the enumerated transcripts have been removed')
+
+#test if the cleaning it was effective
+print('soft music' in str(df1_NoDuplicatives.transcripts))
+print('know' in str(df1_NoDuplicatives.transcripts))
 
 ## NOT NECESSAry, but this is to locate their position
 #matches = re.find(Regex, String, re.MULTILINE)
@@ -65,11 +69,20 @@ print('labels distribution: ', Counter(df2_lenAdjusted.labels) )
 
 
 # =============================================================================
-# #changing labels 3 to labels 2:
+# #changing labels 1 to labels 0:
+# #changing labels 3 to labels 1:
 # =============================================================================
 print()
 df3_binarizedLabelsψlenAdjusted = df2_lenAdjusted # instrumental for↓ 
-df3_binarizedLabelsψlenAdjusted.loc[df3_binarizedLabelsψlenAdjusted['labels'] == 3,'labels'] = 2
+
+df3_binarizedLabelsψlenAdjusted.loc[df3_binarizedLabelsψlenAdjusted['labels'] == 1,'labels'] = 0
+df3_binarizedLabelsψlenAdjusted.loc[df3_binarizedLabelsψlenAdjusted['labels'] == 2,'labels'] = 1
+df3_binarizedLabelsψlenAdjusted.loc[df3_binarizedLabelsψlenAdjusted['labels'] == 3,'labels'] = 1
+
+#check if it went correclty:
+print('labels distribution: ', Counter(df2_lenAdjusted.labels) )
+
+
 df3_binarizedLabelsψlenAdjusted = df3_binarizedLabelsψlenAdjusted.reset_index(drop=True) #resetting index
 #rc
 print('labels distribution: ', Counter(df3_binarizedLabelsψlenAdjusted.labels) )
@@ -84,14 +97,19 @@ print('labels distribution: ', Counter(df3_binarizedLabelsψlenAdjusted.labels) 
 #corpus: transcripts and labels
 x = list(df3_binarizedLabelsψlenAdjusted.transcripts)
 y = list(df3_binarizedLabelsψlenAdjusted.labels)
-print('[soft music]' in str(x) ) # just to check 1.2
-#isolating Cons and nonCons:
 
-df3_consOnly    = df3_binarizedLabelsψlenAdjusted[df3_binarizedLabelsψlenAdjusted.labels==2]
+
+print('[music], in x:','[music]' in str(x) ) # just to check 1.2
+print('[soft music], in x:','[soft music]' in str(x) ) # just to check 1.2
+print('know, in x:','know' in str(x) ) # just to check 1.2
+
+
+#isolating Cons and nonCons:
+df3_consOnly    = df3_binarizedLabelsψlenAdjusted[df3_binarizedLabelsψlenAdjusted.labels==1]
 x_consOnly      = list(df3_consOnly.transcripts)
 #y_consOnly      = list(df3_consOnly.labels) # necessary?
     
-df3_nonConsOnly = df3_binarizedLabelsψlenAdjusted[df3_binarizedLabelsψlenAdjusted.labels==1]
+df3_nonConsOnly = df3_binarizedLabelsψlenAdjusted[df3_binarizedLabelsψlenAdjusted.labels==0]
 x_nonConsOnly   = list(df3_nonConsOnly.transcripts)
 #y_nonConsOnly   = list(df3_nonConsOnly.labels)
 
@@ -101,7 +119,7 @@ x_nonConsOnly   = list(df3_nonConsOnly.transcripts)
 #======================================================================== #
 
 import pickle
-with open('output_1_importψpreprocess;xyψdf3binarizedLenadjustedψxcons,noncons.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+with open('pickle//output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
     pickle.dump([x,y,df3_binarizedLabelsψlenAdjusted,x_consOnly,x_nonConsOnly], f)
 
 

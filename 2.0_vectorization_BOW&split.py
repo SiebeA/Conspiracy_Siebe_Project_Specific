@@ -39,7 +39,7 @@ from sklearn.feature_extraction.text import CountVectorizer , TfidfVectorizer
 vectorizer = TfidfVectorizer(
  ngram_range=(1,1),
  tokenizer=my_cleaner_noLemma_noStop,
- max_features=10000, #sa note: this is important for my 'rare word frequency threshold'
+ max_features=20000, #sa note: this is important for my 'rare word frequency threshold'
  max_df = 0.8, #= 0.50 means "ignore terms that appear in more than 50% of the documents".
  min_df = 1,# 1 means "ignore terms that appear in less than 1 document: i.e. '1' would mean: not ignoring any terms"
  stop_words=None,#list(nlp.Defaults.stop_words), # max-df can take care of this???
@@ -77,12 +77,16 @@ df4_x_vectorized.iloc[:,0].max() # CHECKS to see if the df is filled:
 
 ### some EDA on non-zero term occurences (dup:
 a_nonZero_CountColumnsǀterms = pd.DataFrame(np.count_nonzero(df4_x_vectorized,axis=0),index=vectorizer.get_feature_names(),columns=['nonZeroCounts'])
+a_nonZero_CountColumnsǀterms = a_nonZero_CountColumnsǀterms.sort_values('nonZeroCounts')
+a_nonZero_CountColumnsǀterms = a_nonZero_CountColumnsǀterms.reset_index() #reset index low-high
+
 #Nonzero == term occurs in this doc: this is handy to determine rare term value
 #THINK THIS IS RELATED TO THE MAX/MIN_DF PARAMATER
 
 #The maximum frequency of term uses 
-RARETERM_HYPERPARA = 400
-len( a_nonZero_CountColumnsǀterms[a_nonZero_CountColumnsǀterms.nonZeroCounts<=RARETERM_HYPERPARA] )
+RARETERM_HYPERPARA = 15
+a_RareTErmsLen = len( a_nonZero_CountColumnsǀterms[a_nonZero_CountColumnsǀterms.nonZeroCounts<=RARETERM_HYPERPARA] )
+print('\nlen rare words',a_RareTErmsLen)
 #THE SAME FOR EITHER TF & IDF (because its non zero)
 
 
@@ -90,7 +94,8 @@ len( a_nonZero_CountColumnsǀterms[a_nonZero_CountColumnsǀterms.nonZeroCounts<=
 vectorization_parasFiltered = vectorizer.get_params()
 KEYS_TO_REMOVE = ['binary', 'decode_error' ,'dtype', 'encoding', 'input', 'strip_accents', 'vocabulary', 'analyzer', 'lowercase','norm','sublinear_tf']
 for KEY in KEYS_TO_REMOVE:
-  del vectorization_parasFiltered[KEY]
+    try: del vectorization_parasFiltered[KEY]
+    except:         pass
 
 print('\n the vectorization paramaters:\n\n---',str(type(vectorizer))[-17:-9],'---\n')
 for KEY in vectorization_parasFiltered.keys():print(KEY,'_'*(15-len(KEY)),vectorization_parasFiltered[KEY])
@@ -113,14 +118,14 @@ for KEY in vectorization_parasFiltered.keys():print(KEY,'_'*(15-len(KEY)),vector
 ' ↓ for analyze purposes     '
 #======================================================================== #
 
-x_nonConsOnly_v = vectorizer.transform(X_NONCONSONLY)
-x_nonConsOnly_array = x_nonConsOnly_v.toarray()
-
-x_consOnly_v    = vectorizer.transform(X_CONSONLY)
-x_consOnly_array = x_consOnly_v.toarray()
-for I in dir(): print(I) # sparse matrices dont show up in VE, but are in dir..
-print('\n the vectorization paramaters:\n---',str(type(vectorizer))[-17:-9],'---\n')# Checks
-for KEY in vectorizer.get_params().keys():print(KEY,'_'*(15-len(KEY)),vectorizer.get_params()[KEY])
+#x_nonConsOnly_v = vectorizer.transform(X_NONCONSONLY)
+#x_nonConsOnly_array = x_nonConsOnly_v.toarray()
+#
+#x_consOnly_v    = vectorizer.transform(X_CONSONLY)
+#x_consOnly_array = x_consOnly_v.toarray()
+#for I in dir(): print(I) # sparse matrices dont show up in VE, but are in dir..
+#print('\n the vectorization paramaters:\n---',str(type(vectorizer))[-17:-9],'---\n')# Checks
+#for KEY in vectorizer.get_params().keys():print(KEY,'_'*(15-len(KEY)),vectorizer.get_params()[KEY])
 
 
 
