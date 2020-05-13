@@ -25,14 +25,15 @@ nlp = en_core_web_sm.load(disable=["tagger", "parser", "ner"])
 nlp.Defaults.stop_words |= {"like","thing",} #'|=' is to add several stopwords at once
 #Stopwords_endResult = list(nlp.Defaults.stop_words)
 
-#non lemma cleaner:
+##non lemma cleaner:
 def my_cleaner_noLemma_noStop(text):
         return[token.lower_ for token in nlp(text) if not (token.is_stop or token.is_alpha==False or len(token.lemma_) <3 ) ] 
 
-#lemmatizing cleaner:
+###lemmatizing cleaner:
+#Stopwords_endResult = []
 #def my_cleaner_lemma(text):
 #        return[token.lemma_ for token in nlp(text) if not (token.is_stop or token.lemma_ in Stopwords_endResult or token.is_alpha==False or len(token.lemma_) <3 ) ] #.is_alpha already excludes digits...
-## token.lemma_ in stopwords_endResulS; because eg: thingâœ“ thingsâœ— ; however, leave token.is.stop in, otherwise you end up with: 'PRONOUN ~9k'
+
 
 #======================================================================== #
 ' BOW Vectorization; for classifiation input                         '
@@ -40,7 +41,7 @@ def my_cleaner_noLemma_noStop(text):
 from sklearn.feature_extraction.text import CountVectorizer , TfidfVectorizer
 vectorizer = TfidfVectorizer(
  ngram_range=(1,1),
- tokenizer=my_cleaner_noLemma_noStop,
+ tokenizer=my_cleaner_lemma,
  max_features=20000, #sa note: this is important for my 'rare word frequency threshold'
  max_df = 0.8, #= 0.50 means "ignore terms that appear in more than 50% of the documents".
  min_df = 1,# 1 means "ignore terms that appear in less than 1 document: i.e. '1' would mean: not ignoring any terms"
@@ -101,16 +102,10 @@ for KEY in KEYS_TO_REMOVE:
 
 print('\n the vectorization paramaters:\n\n---',str(type(vectorizer))[-17:-9],'---\n')
 for KEY in vectorization_parasFiltered.keys():print(KEY,'_'*(15-len(KEY)),vectorization_parasFiltered[KEY])
+    
 
-
-
-#======================================================================== #
-' Stage 2        '
-#======================================================================== #
-
-
-
-#======================================================================== #
+    
+    #======================================================================== #
 ' (for classifier/CV input) split train test & vectorize ; should i need to record these params too?'
 #======================================================================== #
 from sklearn.model_selection import train_test_split
@@ -122,7 +117,6 @@ print('dimensions of the train, test sets:', x_train.shape, x_test.shape )
 from collections import Counter # calculating the label distribution:
 COUNTwhole,COUNTtest  = Counter(Y) ,Counter(y_test)
 print( '\nCounting labels:\n whole dataset:',COUNTwhole,'ratio label 2 in whole Y',COUNTwhole[1]/(COUNTwhole[0]+COUNTwhole[1]),'\n train:',Counter(y_train),'\n test:',Counter(y_test), '\nratio label 2 in y_test:', COUNTtest[1]/(COUNTtest[0]+COUNTtest[1]) )
-
 
 
 # =============================================================================
@@ -140,7 +134,7 @@ df_enriched = pd.DataFrame(ENRICHEDARRAY,columns=vectorizer.get_feature_names())
 
 
 #!!! HYPERS::=============================================================================
-rareterm_hyperpara= 3
+rareterm_hyperpara= 15
 #count how many that involves:
 a_RareTErmsLen = len( a_nonZero_CountColumnsǀterms[a_nonZero_CountColumnsǀterms.nonZeroCounts<=rareterm_hyperpara] )
 print('\nlen rare words',a_RareTErmsLen)
@@ -212,10 +206,9 @@ for KEY in vectorization_parasFiltered.keys():print(KEY,'_'*(15-len(KEY)),vector
 # =============================================================================
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
 import numpy as np
 
-nb_classifier = MultinomialNB()
+nb_classifier = GaussianNB()
 nb_classifier.fit(x_train,y= y_train) # model.set_params(onehot__threshold=3.0) if want to one-hot encode only the terms that appear at least three times in the corpus; then the binarizer could be modelled as such
 ŷ_nb = nb_classifier.predict(x_test)
 
@@ -226,14 +219,15 @@ nb_classifier.fit(x_train,y= y_train) # model.set_params(onehot__threshold=3.0) 
 #for i,j in zip(y_test, ŷ_nb):    print(i==j)
 print('\n format of CM:\n', np.array([    ['TN', 'FP'],
                                           ['FN', 'TP']]) )
-print('\n*****', nb_classifier, '*****\nBASE')
+
+print('\n*****', nb_classifier, '*****\n\nBASE NB')
 #print(str( vectorizer)[:13])
 print(confusion_matrix(y_test,ŷ_nb))
 print(classification_report(y_test,ŷ_nb,zero_division=0))
 print('accuracy_score',accuracy_score(y_test, ŷ_nb))
 
 F1_scoreBaseline_mnb = round(f1_score(y_test,ŷ_nb,average='macro'),3)
-print('\n***f1_score_macro :',F1_scoreBaseline_mnb,'***\n')
+print('\n***f1_score_macro :',F1_scoreBaseline_mnb,'***\n\nBASE')
 
 # =============================================================================
 # NB with enrichment:
@@ -251,13 +245,14 @@ import numpy as np
 #for i,j in zip(y_test, ŷ_enriched_mb):    print(i==j)
 print('\n format of CM:\n', np.array([    ['TN', 'FP'],
                                           ['FN', 'TP']]) )
-print('\n***', nb_classifier, '***\nENRICHED')
+    
+print('\n***', nb_classifier, '***\n\nENRICHED NB')
 #print(str( vectorizer)[:13])
 print(confusion_matrix(y_test,ŷ_enriched_mb))
 print(classification_report(y_test,ŷ_enriched_mb, zero_division=0))
 #print('accuracy_score',accuracy_score(y_test, ŷ_enriched_mb))
 F1_score_enriched_mnb = round(f1_score(y_test,ŷ_enriched_mb,average='macro'),3)
-print('\n***f1_score_macro :',f1_score(y_test,ŷ_enriched_mb,average='macro'),'***\n\n ENRICHED \n')   
+print('\n***f1_score_macro :',f1_score(y_test,ŷ_enriched_mb,average='macro'),'***\n \n')   
 
 
 # =============================================================================
@@ -275,7 +270,7 @@ print(classification_report(y_test,ŷ_svm, zero_division=0))
 print('\n\n format of CM:\n', np.array([    ['TN', 'FP'],
                                             ['FN', 'TP']]) )
 #print(str( vectorizer)[:13])
-print('\n\n BASE \n',confusion_matrix(y_test,ŷ_svm))
+print('\n\n BASE SVM \n',confusion_matrix(y_test,ŷ_svm))
 F1_scoreBaseline_svm = round(f1_score(y_test,ŷ_svm,average='macro'),3)
 print('\n***f1_score_macro :',F1_scoreBaseline_svm,'***\n \n-------------')
 
@@ -286,21 +281,14 @@ print('\n***f1_score_macro :',F1_scoreBaseline_svm,'***\n \n-------------')
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 
 print('\n\n',str( vectorizer)[:13])
-print(classification_report(y_test,ŷ_svm, zero_division=0))
+print(classification_report(y_test,ŷ_svm_enriched, zero_division=0))
 print('\n\n format of CM:\n', np.array([    ['TN', 'FP'],
                                             ['FN', 'TP']]) )
 #print(str( vectorizer)[:13])
-print('\n\n ENRICHED \n',confusion_matrix(y_test,ŷ_svm_enriched))
+print('\n\n ENRICHED SVM \n',confusion_matrix(y_test,ŷ_svm_enriched))
 F1_score_enriched_SVM = round(f1_score(y_test,ŷ_svm_enriched,average='macro',),3)
 print('\n***f1_score_macro :',F1_score_enriched_SVM,'***\n')
 
 
 print('\n\n the vectorization paramaters:\n\n---',str(type(vectorizer))[-17:-9],'---\n')
 for KEY in vectorization_parasFiltered.keys():print(KEY,'_'*(15-len(KEY)),vectorization_parasFiltered[KEY])
-
-
-
-
-
-
-
