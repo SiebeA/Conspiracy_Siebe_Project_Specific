@@ -3,9 +3,6 @@
 ## Importing libraries (inc Wordvecmodel)
 ## =============================================================================
 ##nlp essentials:
-
-
-
 #import spacy
 #import en_core_web_sm # the english spacy core (sm = small database)
 ## for installing spacy & en_core; https://spacy.io/usage
@@ -34,7 +31,6 @@
 #model = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
 #
 #print("--- %s seconds ---" % (time.time() - START_TIME))
-
 
 #======================================================================== #
 ' (for classifier/CV input) split train test & vectorize ; should i need to record these params too?'
