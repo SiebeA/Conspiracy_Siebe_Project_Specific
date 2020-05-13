@@ -49,11 +49,6 @@ from collections import Counter # calculating the label distribution:
 COUNTwhole,COUNTtest  = Counter(Y) ,Counter(y_test)
 print( '\nCounting labels:\n whole dataset:',COUNTwhole,'ratio label 2 in whole Y',COUNTwhole[1]/(COUNTwhole[0]+COUNTwhole[1]),'\n train:',Counter(y_train),'\n test:',Counter(y_test), '\nratio label 2 in y_test:', COUNTtest[1]/(COUNTtest[0]+COUNTtest[1]) )
 
-
-# =============================================================================
-' 5 machine learning without VECTOR ENRICHMENt'
-# =============================================================================
-
 # =============================================================================
 '''enriching the Rare and out of vocab words:'''
 # ============================================================================
