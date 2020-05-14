@@ -1,7 +1,9 @@
+[link to markupt help!](https://guides.github.com/features/mastering-markdown/)
+
 # Conspiracy_Siebe_Project_Specific
 
-update: may 14
-Highest f1: 0.798 SVM ; Enriched ; 
+update: may 14)
+- Highest f1: 0.798 SVM ; Enriched ; 
 
 **__TBD:__**
 I have to incorporate script to incorporate the wordvector + rareterm + neighboring + wordvector dimensions hyperparmaters in my gridsearch (along max features and classifier hypers)
