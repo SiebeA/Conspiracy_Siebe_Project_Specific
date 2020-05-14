@@ -13,3 +13,6 @@ Info on the files within the repository:
 | 3_GridsearchCV.py                 | Gridsearch-system=setup: Hyperparamaters of baseline classifier can be optimzed even more  |
 | FE1_RedditCorpus                  | 'the domain specific external corpus/dataset': 40k reddit comments are scraped, from which feature can be extracted (looking into possibility to use googleBigquery to download an even bigger dataset)
 | FE2_FeatureEnrichment             | Working on it; includes a "general corpus": pretrained external wordVector model (GloVe wikipedia 2014 (400k terms) and the code for the feature-enrichment process by which the general & domainspecific corpus (FE2) are input . For these models, vectorization&classifier Hyperparamaters (can(and ought for comparison!) be easily extended here|
+
+**__TBD:__**
+Find a way to incorporate the wordvector + rareterm + neighboring + wordvector dimensions hyperparmaters in my gridsearch (along max features and classifier hypers)
