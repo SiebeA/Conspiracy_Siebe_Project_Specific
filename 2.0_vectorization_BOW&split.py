@@ -84,7 +84,7 @@ a_nonZero_CountColumnsǀterms = a_nonZero_CountColumnsǀterms.reset_index() #res
 #THINK THIS IS RELATED TO THE MAX/MIN_DF PARAMATER
 
 #The maximum frequency of term uses 
-RARETERM_HYPERPARA = 15
+RARETERM_HYPERPARA = 3
 a_RareTErmsLen = len( a_nonZero_CountColumnsǀterms[a_nonZero_CountColumnsǀterms.nonZeroCounts<=RARETERM_HYPERPARA] )
 print('\nlen rare words',a_RareTErmsLen)
 #THE SAME FOR EITHER TF & IDF (because its non zero)
