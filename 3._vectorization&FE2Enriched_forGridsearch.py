@@ -30,20 +30,26 @@
             #i.e. the end of the index (high frequency occuring terms) of a 1,000 & 10,000 maxFeature index are the same; because these terms are the last to be omitted.
       
         
-#hypers for enriching
-#RARETERM= 3
-SIMILARITY_HYPERPARA = 0.75
+# =============================================================================
+# #hypers for enriching
+# =============================================================================
+NEIGHBOR[1] * df_test.iloc[DOCINDEX][TERM]#↑adding a value that is the product of the similarity score(NEIGHBOR[1] * the value of the TERM in the respective DOC(df_test.iloc[DOCINDEX][TERM]), to the NEIGHBOR of the rare term in the DOC where the rare term occurs
+# HYPER PARAMATER       
+RARETERMLIST = [3]#,7,9,12,15,18,24,26,29]
+SIMILARITY_HYPERPARA = 0.3
 
-#hypers for classifying
+# =============================================================================
+# #hypers for classifying
+# =============================================================================
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
 nb_classifier = GaussianNB()
 
 # =============================================================================
 # hypers for vectorization
 # =============================================================================
-MAXFEATURES = [10000]#, 15000,20000,25000,30000,32324]# 4000, 5000, 6000]
-RARETERMLIST = [12]#,7,9,12,15,18,24,26,29] #if % rare terms too low; go to next
-DIMENSIONLIST = ['50'+'d','200'+'d']#,'200'+'d','100'+'d']
+MAXFEATURES = [20000]#, 15000,20000,25000,30000,32324]# 4000, 5000, 6000]
+
+DIMENSIONLIST = ['200'+'d']#,'50'+'d','200'+'d','100'+'d']
 
 #======================================================================== #
 ''' TBD ↑ & TBE (to be experimented) experimenting:
@@ -142,7 +148,7 @@ for MAXFEATURE in MAXFEATURES:
 #            print()
         
 # =============================================================================
-#         
+#   Section X      
 # =============================================================================
         
         for DIMENSION in DIMENSIONLIST:
