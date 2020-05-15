@@ -1,9 +1,9 @@
-import warnings
-warnings.filterwarnings("ignore", category=UserWarning)
-#======================================================================== #
-' following can be preloaded, before loop/gridsearch (uncomment 1st time then comment) '
-#======================================================================== #
-
+#import warnings
+#warnings.filterwarnings("ignore", category=UserWarning)
+##======================================================================== #
+#' following can be preloaded, before loop/gridsearch (uncomment 1st time then comment) '
+##======================================================================== #
+#
 #import numpy as np
 #import pickle
 #import en_core_web_sm
@@ -31,7 +31,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
       
         
 #hypers for enriching
-rareterm_hyperpara= 25
+#RARETERM= 3
 SIMILARITY_HYPERPARA = 0.75
 
 #hypers for classifying
@@ -41,13 +41,14 @@ nb_classifier = GaussianNB()
 # =============================================================================
 # hypers for vectorization
 # =============================================================================
-MAXFEATURES = [1000]# 4000, 5000, 6000]
-#RARETERMLIST = [1,2,3,4,5,7,9,12,15,18,24,26,29] #if % rare terms too low; go to next
-DIMENSIONLIST = ['50'+'d','100'+'d']
+MAXFEATURES = [10000]#, 15000,20000,25000,30000,32324]# 4000, 5000, 6000]
+RARETERMLIST = [12]#,7,9,12,15,18,24,26,29] #if % rare terms too low; go to next
+DIMENSIONLIST = ['50'+'d','200'+'d']#,'200'+'d','100'+'d']
 
 #======================================================================== #
-''' TBD ↑; 
-- including the enrichment product hyper
+''' TBD ↑ & TBE (to be experimented) experimenting:
+- Try online to enrich unique neighbors
+- including the enrichment product hyper 
 - rare word need to be squared with max features
 - when rare words are too few in comparison to max features --> loop to next max feature
 - count the TP + TN for not having to do mental math
@@ -58,6 +59,8 @@ DIMENSIONLIST = ['50'+'d','100'+'d']
 
 # looping through the specified gridsearch hyperparas:
 for MAXFEATURE in MAXFEATURES:
+    for RARETERM in RARETERMLIST:
+        print('\n\nthis many Rareterms:',RARETERM)
 #    for DIMENSION in DIMENSIONLIST:   # comment this to check for rare word length by maxfeatureX
         #======================================================================== #
         ' import the output of 1_preprocessing        '
@@ -105,7 +108,7 @@ for MAXFEATURE in MAXFEATURES:
         #Transform seperately: # DOES NOT SHOW UP IN VARIABLE EXPLORER
         x_vec = vectorizer.transform(X) #whole internal corpus
         x_vec_array = x_vec.toarray()
-        print( '\nthis many docs and features:', x_vec_array.shape)
+        print( 'this many docs and features:', x_vec_array.shape)
         
         
         #ANALYZING , STOP WORDS GOT FLTERED HERE??::
@@ -129,11 +132,12 @@ for MAXFEATURE in MAXFEATURES:
         a_nonZero_CountColumnsǀterms = a_nonZero_CountColumnsǀterms.reset_index() #reset index low-high
         #Nonzero == term occurs in this doc: this is handy to determine rare term value
         #THINK THIS IS RELATED TO THE MAX/MIN_DF PARAMATER
-        a_RareTErmsLen = len( a_nonZero_CountColumnsǀterms[a_nonZero_CountColumnsǀterms.nonZeroCounts<=rareterm_hyperpara] )
-        print('\nlen rare words',a_RareTErmsLen)
+        a_RareTErmsLen = len( a_nonZero_CountColumnsǀterms[a_nonZero_CountColumnsǀterms.nonZeroCounts<=RARETERM] )
+        print('len rare words:',a_RareTErmsLen)
         print(MAXFEATURE)
         
-        print('rare words are this % of maxfeatures:',a_RareTErmsLen/MAXFEATURE)
+        Ratio_rareVSMaxFeature = a_RareTErmsLen/MAXFEATURE
+        print('rare words as the ratio of maxfeatures:',Ratio_rareVSMaxFeature)
 #        if a_RareTErmsLen > 0.5*MAXFEATURE: # CAREFULL AS IT CAN STOP HERE IF NOT SATISFIED
 #            print()
         
@@ -222,7 +226,7 @@ for MAXFEATURE in MAXFEATURES:
                         START_TIME = time.time()
                         for TERM in df_test: #loops through each of the terms, of each of the doc
                     #        print(TERM)
-                            if df_test.iloc[DOCINDEX][TERM]>0 and np.count_nonzero(df[TERM]) <= rareterm_hyperpara: #checks how many non0/occurences the term has along all docs in training
+                            if df_test.iloc[DOCINDEX][TERM]>0 and np.count_nonzero(df[TERM]) <= RARETERM: #checks how many non0/occurences the term has along all docs in training
                     #                print(f'\n rareterm: "{TERM}" is in test doc')
                                 
 #!!! =============================================================================
@@ -230,16 +234,14 @@ for MAXFEATURE in MAXFEATURES:
 # =============================================================================
                                     if NEIGHBOR[1]>SIMILARITY_HYPERPARA and NEIGHBOR[0] in df.columns:
                                         NEIGHBORS.append(NEIGHBOR[0])
-                    
-                    #                        print(f'TERM:{TERM} \n NEIGHBOR:{NEIGHBOR[0]} with a similarity of {NEIGHBOR[1]}')
-                                        df_enriched.iloc[DOCINDEX][NEIGHBOR[0]] += NEIGHBOR[1] * df_test.iloc[DOCINDEX][TERM]
-                       
+# =============================================================================
+                                        df_enriched.iloc[DOCINDEX][NEIGHBOR[0]] += NEIGHBOR[1] * df_test.iloc[DOCINDEX][TERM]#↑adding a value that is the product of the similarity score(NEIGHBOR[1] * the value of the TERM in the respective DOC(df_test.iloc[DOCINDEX][TERM]), to the NEIGHBOR of the rare term in the DOC where the rare term occurs
+# HYPER PARAMATER                                        
+# =============================================================================
                         print (" %s secs" % round((time.time() - START_TIME),0))
                         print(f'len neighbors = {len(NEIGHBORS)}')
                         print(f'len unique neighbors = {len(set(NEIGHBORS))}')
-                    # =============================================================================
-                    #                         #↑adding a value that is the product of the similarity score * the value of the TERM in the respective DOC, to the NEIGHBOR of the rare term in the DOC where the rare term occurs: 
-                    # =============================================================================
+
                     except KeyError:
                         print(KeyError, TERM)
                         pass
@@ -266,7 +268,8 @@ for MAXFEATURE in MAXFEATURES:
                 #the total nr of values change as a result of enrichment:
                 print(f'\n total summed values: \n df_test.values: {df_test.values.sum()} \n df_aggregated.values.sum: {df_aggregated.values.sum()}' )
                 
-                print(f' \n the difference of nonzero values in whole df as result of enrichment:\n {abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated))} \n compared to a total of {df_test.shape[0] * df_test.shape[1]} cells in the df \n that difference is  {round(abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated)) /(df_test.shape[0] * df_test.shape[1])*100),2} percent of total values in the BOW ')
+                Enriched_percentage = round(abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated)) /(df_test.shape[0] * df_test.shape[1])*100,1)
+                print(f' \n the difference of nonzero values in whole df as result of enrichment:\n {abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated))} \n compared to a total of {df_test.shape[0] * df_test.shape[1]} cells in the df \n that difference is  {Enriched_percentage} percent of total values in the BOW ')
                 
                 # =============================================================================
                 # remember the vect paras:
@@ -394,10 +397,13 @@ for MAXFEATURE in MAXFEATURES:
                 for KEY in vectorization_parasFiltered.keys():print(KEY,'_'*(15-len(KEY)),vectorization_parasFiltered[KEY])
                 
                 f1s.append(F1_score_enriched_SVM)
-                tnψtp.append(tnψfn_nb_base,tnψfn_nb_enriched,tnψfn_svm_base,tnψfn_svm_enriched)
+                tnψtp.append((tnψfn_nb_base,tnψfn_nb_enriched,tnψfn_svm_base,tnψfn_svm_enriched))
                 
                 #_______________________________________________________________________
-                print('\n\n',f1s)
+                print('\n\n f1s:',f1s)
+                print('\n\n tnψtp:',tnψtp)
+                print(Enriched_percentage, 'percent of BOW cells were enriched')
+                
                 
                 #_______________________________________________________________________
                 
@@ -407,9 +413,9 @@ for MAXFEATURE in MAXFEATURES:
                 #======================================================================== #
                 
                 
-                # function for storing the baseline results of the 2 clfs:
+                # function for storing the baseline results of the 2 clfs in pickle hereafter
                 def paraPickleSaverBASE(clf):
-                    '''specify the clf and whether it is the enriched or no track, then it will be saved'''
+                    '''for the baseline tracks; both Nb & svm'''
                     import pickle
                     #:2 can be edited:
                     VECTORIZER_TYPE = str(type(vectorizer))[-17:-9]
@@ -417,28 +423,29 @@ for MAXFEATURE in MAXFEATURES:
                     NGRAM_RANGE = vectorizer.get_params()['ngram_range']
                     MAX_DF = vectorizer.get_params()['max_df']
                     MIN_DF = vectorizer.get_params()['min_df']
-                    CLF_name = str(clf)[:3]
+                    CLF_name = str(clf)[:3].upper()
                     F1_score = None
+                    TnTp = None
                     if clf == nb_classifier:
                         F1_score = F1_scoreBaseline_mnb
+                        TnTp = tnψfn_nb_enriched
                     elif clf == svm_classifier:
                         F1_score = F1_scoreBaseline_svm
-                    print('\n f1 score:', F1_score)
+                        TnTp = tnψfn_svm_base
+                    print('\n f1 score:', F1_score, '\n tn tp:', TnTp)
                         
                     from datetime import datetime
                     TIME = datetime.now().strftime("_%d-%h-%H;%M;%S")
                     PATH = 'C:\\Users\Sa\\WD_thesisPython_workdrive\\Text_Classification_Pipeline'
                     # here I could add in {} WHAT I want to SHOW UP IN FILENAME.. COEFS AND METRICS.. ?WRITE TO EXCEL FILE?
-                    with open(PATH+f'\_F1scores;{TIME}_f1Macro={F1_score}_BaseLine_Clf={CLF_name}__{VECTORIZER_TYPE}_max_features={MAX_FEATURES}_ngram_range={NGRAM_RANGE}_max_df={MAX_DF}_min_df={MIN_DF}__similarity={SIMILARITY_HYPERPARA}_rareterm={rareterm_hyperpara}', 'wb') as f:
+                    with open(PATH+f'\{TIME}_____Base_f1Macro={F1_score}_TnTp={TnTp}_Clf={CLF_name}__{VECTORIZER_TYPE}_max_features={MAX_FEATURES}_ngram_range={NGRAM_RANGE}_max_df={MAX_DF}_min_df={MIN_DF}__similarity={SIMILARITY_HYPERPARA}_rareterm={RARETERM}_ratioRareMax={Ratio_rareVSMaxFeature}', 'wb') as f:
                         pickle.dump([F1_score ,allParamaters],f)
                         
                 #paraPickleSaverBASE(clf)
-                
-                
-                
-                # function for storing the ENRICHED results of the 2 clfs:
+
+                # function for storing the ENRICHED results of the 2 clfs in pickle hereafter
                 def paraPickleSaverENRICHED(clf):
-                    '''specify the clf and whether it is the enriched or no track, then it will be saved'''
+                    '''for the enriched track both Nb & svm'''
                     import pickle
                     #:2 can be edited:
                     VECTORIZER_TYPE = str(type(vectorizer))[-17:-9]
@@ -446,21 +453,23 @@ for MAXFEATURE in MAXFEATURES:
                     NGRAM_RANGE = vectorizer.get_params()['ngram_range']
                     MAX_DF = vectorizer.get_params()['max_df']
                     MIN_DF = vectorizer.get_params()['min_df']
-                    CLF_name = str(clf)[:3]
+                    CLF_name = str(clf)[:3].upper()
                     F1_score = None
+                    TnTp = None
                     if clf == nb_classifier:
                         F1_score = F1_score_enriched_mnb
+                        TnTp = tnψfn_nb_enriched
                     elif clf == svm_classifier:
                         F1_score = F1_score_enriched_SVM
-                    print('\n f1 score:', F1_score)
+                        TnTp = tnψfn_svm_enriched
+                    print('\n f1 score:', F1_score, '\n tn tp:', TnTp, '\n _enriched%:',round(abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated)) /(df_test.shape[0] * df_test.shape[1])*100),2)
                         
                     from datetime import datetime
                     TIME = datetime.now().strftime("_%d-%h-%H;%M;%S")
                     PATH = 'C:\\Users\Sa\\WD_thesisPython_workdrive\\Text_Classification_Pipeline'
                     # here I could add in {} WHAT I want to SHOW UP IN FILENAME.. COEFS AND METRICS.. ?WRITE TO EXCEL FILE?
-                    with open(PATH+f'\_F1scores;{TIME}_f1Macro={F1_score}_Enriched_Clf={CLF_name}__{VECTORIZER_TYPE}_max_features={MAX_FEATURES}_ngram_range={NGRAM_RANGE}_max_df={MAX_DF}_min_df={MIN_DF}__similarity={SIMILARITY_HYPERPARA}_rareterm={rareterm_hyperpara}', 'wb') as f:
+                    with open(PATH+f'\{TIME}_Enriched_f1Macro={F1_score}_TnTp={TnTp}_CLF={CLF_name}__{VECTORIZER_TYPE}_max_features={MAX_FEATURES}_ngram_range={NGRAM_RANGE}_max_df={MAX_DF}_min_df={MIN_DF}__similarity={SIMILARITY_HYPERPARA}_rareterm={RARETERM}_ratioRareMax={Ratio_rareVSMaxFeature}_enriched%={Enriched_percentage}', 'wb') as f:
                         pickle.dump([F1_score ,allParamaters],f)
-                
                 
                 # =============================================================================
                 # # a loop such that both the NB & SVM are saved in both tracks:
@@ -470,7 +479,7 @@ for MAXFEATURE in MAXFEATURES:
                     # I wanted this: (and omitting the above functions) but does not work
                 #    from my_FunctionsModule_ForThesis import paraPickleSaverBASE
                 #    from my_FunctionsModule_ForThesis import paraPickleSaverENRICHED
-                    allParamaters = {'.raretermHyper':rareterm_hyperpara, 'raretermslen': a_RareTErmsLen, 'vectparas': vectorizer.get_params(), 'neighborsLEN':len(NEIGHBORS), 'neighborsLen_set':len(set(NEIGHBORS)), 'wordvecDimensions':DIMENSION,'.SIMILARITY_HYPERPARA':SIMILARITY_HYPERPARA,'clfParams': CLF.get_params()
+                    allParamaters = {'.raretermHyper':RARETERM, 'raretermslen': a_RareTErmsLen, 'vectparas': vectorizer.get_params(), 'neighborsLEN':len(NEIGHBORS), 'neighborsLen_set':len(set(NEIGHBORS)), 'wordvecDimensions':DIMENSION,'.SIMILARITY_HYPERPARA':SIMILARITY_HYPERPARA,'clfParams': CLF.get_params()
                  }
                     paraPickleSaverBASE(CLF)
                     print(str(CLF)[:3])
