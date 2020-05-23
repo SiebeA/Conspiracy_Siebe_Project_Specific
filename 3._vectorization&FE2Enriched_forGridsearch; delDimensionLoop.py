@@ -1,82 +1,83 @@
-####======================================================================== #
-###' following can be preloaded, before loop/gridsearch (uncomment 1st time then comment) '
-####======================================================================== #
-#import warnings
-#warnings.filterwarnings("ignore", category=UserWarning)
-#
-#import numpy as np
-#
-#import pickle
-#
-#import en_core_web_sm
-#nlp = en_core_web_sm.load(disable=["tagger", "parser", "ner"]) 
-##nlp.Defaults.stop_words |= {"soft","music",} #'|=' is to add several stopwords at once
-##Stopwords_endResult = list(nlp.Defaults.stop_words)
-###non lemma cleaner:
-#def my_cleaner_noLemma(text):
-#        return[token.lower_ for token in nlp(text) if not (token.is_stop or token.is_alpha==False or len(token.lemma_) <3 ) ] 
-#        
-#from sklearn.feature_extraction.text import CountVectorizer , TfidfVectorizer
-#import pandas as pd 
-#
-#
-#import matplotlib.pyplot as plt
-#from gensim.test.utils import datapath, get_tmpfile
-#from gensim.models import KeyedVectors
-#from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014;
-#import time
-#
-## =============================================================================
-## #loading the word vectors models
-## =============================================================================
-##GLOVE
-#DIMENSION = '200'+'d'
-#GLOVE_FILE = datapath(f"C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.{DIMENSION}.txt")
-#WORD2VEC_GLOVE_FILE = get_tmpfile(f"glove.6B.{DIMENSION}.txt") # specify which d file is used here
-#glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
-##model:
-#gloveModel = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
-#
-#
-##SMALL SELFTRAINED MODEL
-#with open('selfTrainedWord2vec3.pkl','rb') as f:  # Python 3: open(..., 'rb')
-#    selfTrainedw2vModel_small = pickle.load(f)
-#print(len(selfTrainedw2vModel_small.wv.vocab))
-#
-#
-##BIG SELFTRAINED MODEL
-#with open('selfTrainedWord2vec4BIG.pkl','rb') as f:  # Python 3: open(..., 'rb')
-#    selfTrainedw2vModel_big = pickle.load(f)
-#print(len(selfTrainedw2vModel_big.wv.vocab))
-#
-#
-#from sklearn.model_selection import train_test_split
-#from collections import Counter # calculating the label distribution:
-#from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
-#from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
-#from sklearn import svm        
-#
-##======================================================================== #
-#' import the output of 1_preprocessing        '
-##======================================================================== #
-##THESE ARE WITH THE LABELS 0-1
-#with open('pickle\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
-#    X, Y,DF3_BINARIZEDLABELSΨLENADJUSTED,X_CONSONLY,X_NONCONSONLY = pickle.load(f)
+###======================================================================== #
+##' following can be preloaded, before loop/gridsearch (uncomment 1st time then comment) '
+###======================================================================== #
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
+import numpy as np
+
+import pickle
+
+import en_core_web_sm
+nlp = en_core_web_sm.load(disable=["tagger", "parser", "ner"]) 
+#nlp.Defaults.stop_words |= {"soft","music",} #'|=' is to add several stopwords at once
+#Stopwords_endResult = list(nlp.Defaults.stop_words)
+##non lemma cleaner:
+def my_cleaner_noLemma(text):
+        return[token.lower_ for token in nlp(text) if not (token.is_stop or token.is_alpha==False or len(token.lemma_) <3 ) ] 
+        
+from sklearn.feature_extraction.text import CountVectorizer , TfidfVectorizer
+import pandas as pd 
+
+
+import matplotlib.pyplot as plt
+from gensim.test.utils import datapath, get_tmpfile
+from gensim.models import KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014;
+import time
+
+# =============================================================================
+# #loading the word vectors models
+# =============================================================================
+#GLOVE
+DIMENSION = '200'+'d'
+GLOVE_FILE = datapath(f"C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.{DIMENSION}.txt")
+WORD2VEC_GLOVE_FILE = get_tmpfile(f"glove.6B.{DIMENSION}.txt") # specify which d file is used here
+glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
+#model:
+gloveModel = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
+
+
+#SMALL SELFTRAINED MODEL
+with open('selfTrainedWord2vec3.pkl','rb') as f:  # Python 3: open(..., 'rb')
+    selfTrainedw2vModel_small = pickle.load(f)
+print(len(selfTrainedw2vModel_small.wv.vocab))
+
+
+#BIG SELFTRAINED MODEL
+with open('selfTrainedWord2vec4BIG.pkl','rb') as f:  # Python 3: open(..., 'rb')
+    selfTrainedw2vModel_big = pickle.load(f)
+print(len(selfTrainedw2vModel_big.wv.vocab))
+
+
+from sklearn.model_selection import train_test_split
+from collections import Counter # calculating the label distribution:
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
+from sklearn import svm        
+
+#======================================================================== #
+' import the output of 1_preprocessing        '
+#======================================================================== #
+#THESE ARE WITH THE LABELS 0-1
+with open('pickle\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
+    X, Y,DF3_BINARIZEDLABELSΨLENADJUSTED,X_CONSONLY,X_NONCONSONLY = pickle.load(f)
+
 
 
 #======================================================================== #
 '  !!! hyperpara definition / gridsearch definition       '
 #======================================================================== #
-WordvecModelList = [selfTrainedw2vModel_big,gloveModel ]
+WordvecModelList = [selfTrainedw2vModel_big]# , gloveModel ]
 
     
 
-RATIOHYPERLIST = [0.1,0.4,0.3,0.2]# determines the ratio of rareterms/maxfeatures: i.e. 0.3 = 30% of the max features is the absolute rare term integer: eg 100 max features * 0.3 = rareterm = 30; this is because the ratio determines the enrichement %; now it is robust, if max feature changes, there is no problem
+RATIOHYPERLIST = [0.3]# determines the ratio of rareterms/maxfeatures: i.e. 0.3 = 30% of the max features is the absolute rare term integer: eg 100 max features * 0.3 = rareterm = 30; this is because the ratio determines the enrichement %; now it is robust, if max feature changes, there is no problem
 
 
 SIMILARITY_HYPERPARA_LIST = [0]#, 0.5, 0.6 , 0.7] # APT LESS IMPORTANT SINCE THE ENRICHMENT EXPRESSION INCLUDES MULTIPLICATION WITH THE SIMILARITY
 
-TOP_NEIGHBORS_list = [50,25,100]
+TOP_NEIGHBORS_list = [50]
 
 # =============================================================================
 # #hypers for classifying
@@ -89,7 +90,7 @@ nb_classifier = MultinomialNB()
 # =============================================================================
 Vectorizer= TfidfVectorizer
 # LEMMA= 
-MAXFEATURES = [1000,15000,35000,8000,12000,3000,25000,6000]#,12000,28000,5000,10000,15000,25000,30000,35000]#,16000,21000,18000,19000,17000,25000,8000]#, 15000,20000,25000,30000,32324]# 4000, 5000, 6000]
+MAXFEATURES = [4000]#,12000,28000,5000,10000,15000,25000,30000,35000]#,16000,21000,18000,19000,17000,25000,8000]#, 15000,20000,25000,30000,32324]# 4000, 5000, 6000]
 MAX_DF_LIST = [0.9]
 MIN_DF = 1
 
@@ -288,38 +289,36 @@ for WordvecModel in WordvecModelList:
                         #!!! =============================================================================
                         # # MNB BASELINE
                         # =============================================================================
-                        
-                        nb_classifier.fit(x_train,y_train) # model.set_params(onehot__threshold=3.0) if want to one-hot encode only the terms that appear at least three times in the corpus; then the binarizer could be modelled as such
-                        ŷ_nb = nb_classifier.predict(x_test)
-                        
-                        
-            #                ŷ_probability = nb_classifier.predict_proba(x_test)
-                        
-                        #for i,j in zip(y_test, ŷ_nb):    print(i==j)
-                        print('\n format of CM:\n', np.array([    ['TN', 'FP'],
-                                                                  ['FN', 'TP']]) )
-                        
-                        print('\n*****', nb_classifier, '*****\n\nBASE NB')
-                        #print(str( vectorizer)[:13])
-                        print(confusion_matrix(y_test,ŷ_nb))
-                        
-                        
-                        TNψfn_nb_base = confusion_matrix(y_test,ŷ_nb)[0,0] + confusion_matrix(y_test,ŷ_nb)[1,1]
-                        print('tn+tp',TNψfn_nb_base)
-                        
-                        print(classification_report(y_test,ŷ_nb,zero_division=0))
-                        
-                        F1_scoreBaseline_mnb = round(f1_score(y_test,ŷ_nb,average='macro'),3)
-                        print('\n\n***f1_score_macro :',F1_scoreBaseline_mnb,'***\n\nBASE')
-                        f1s.append(F1_scoreBaseline_mnb)
+                        for I in range(10): # if you want to hyper tuning
+                            print('\n alpha*******:',I/10)
+                            nb_classifier = MultinomialNB(alpha=I/10)
+                            nb_classifier.fit(x_train,y_train) # model.set_params(onehot__threshold=3.0) if want to one-hot encode only the terms that appear at least three times in the corpus; then the binarizer could be modelled as such
+                            ŷ_nb = nb_classifier.predict(x_test)
+                            
+                            
+                #                ŷ_probability = nb_classifier.predict_proba(x_test)
+                            
+                            #for i,j in zip(y_test, ŷ_nb):    print(i==j)
+                            print('\n format of CM:\n', np.array([    ['TN', 'FP'],
+                                                                      ['FN', 'TP']]) )
+                            
+                            print('\n*****', nb_classifier, '*****\n\nBASE NB')
+                            #print(str( vectorizer)[:13])
+                            print(confusion_matrix(y_test,ŷ_nb))
+                            
+                            
+                            TNψfn_nb_base = confusion_matrix(y_test,ŷ_nb)[0,0] + confusion_matrix(y_test,ŷ_nb)[1,1]
+                            print('tn+tp',TNψfn_nb_base)
+                            
+                            print(classification_report(y_test,ŷ_nb,zero_division=0))
+                            
+                            F1_scoreBaseline_mnb = round(f1_score(y_test,ŷ_nb,average='macro'),3)
+                            print('\n\n***f1_score_macro :',F1_scoreBaseline_mnb,'***\n\nBASE')
+                            f1s.append(F1_scoreBaseline_mnb)
                         
                         # =============================================================================
                         # NB with enrichment:
                         # =============================================================================
-                        
-                        for I in range(1,30): # if you want to hyper tuning
-                            print('\n alpha:',I/30)
-                            nb_classifier = MultinomialNB(alpha=I/10)
                             nb_classifier.fit(x_train, y_train)
                             
                             ŷ_nb_enriched = nb_classifier.predict(df_aggregated) #  the predicted class
@@ -350,7 +349,7 @@ for WordvecModel in WordvecModelList:
             #                    from sklearn import svm
             
     #                    for hypertuning:
-                        for I in range(1,30): 
+                        for I in range(22,30): 
                             print('\n C=',I/10,'\n')
             
                             svm_classifier = svm.SVC(C=I/10,kernel='linear', degree=3,gamma='auto',probability=True)
@@ -424,9 +423,11 @@ for WordvecModel in WordvecModelList:
                                 F1_score = None
                                 TnTp = None
                                 C= None
+                                Alpha = None
                                 if clf == nb_classifier:
                                     F1_score = F1_scoreBaseline_mnb
                                     TnTp = TNψfn_nb_base
+                                    Alpha = nb_classifier.get_params()['alpha']
                                 elif clf == svm_classifier:
                                     F1_score = F1_scoreBaseline_svm
                                     TnTp = TNψfn_svm_base
@@ -438,7 +439,7 @@ for WordvecModel in WordvecModelList:
                                 TIME = datetime.now().strftime("_%d-%h-%H;%M;%S")
                                 PATH = 'C:\\Users\Sa\\WD_thesisPython_workdrive\\Text_Classification_Pipeline\\'
                                 # here I could add in {} WHAT I want to SHOW UP IN FILENAME.. COEFS AND METRICS.. ?WRITE TO EXCEL FILE?
-                                with open(PATH+f'{TIME};_Base_____f1={F1_score};_TnTp={TnTp};_CLF={CLF_name};__{VECTORIZER_TYPE};_max_features={MAX_FEATURES};_ngram={NGRAM_RANGE};_max_df={MAX_DF};_min_df={MIN_DF};__similarity={SIMILARITY_HYPERPARA};_rareterm={RARETERM};_ratioRareMax={RatioHyper};_c={C}_Seed={SEED}_.thesis', 'wb') as f:
+                                with open(PATH+f'{TIME};_Base_____f1={F1_score};_TnTp={TnTp};_CLF={CLF_name};__{VECTORIZER_TYPE};_max_features={MAX_FEATURES};_ngram={NGRAM_RANGE};_max_df={MAX_DF};_min_df={MIN_DF};__similarity={SIMILARITY_HYPERPARA};_rareterm={RARETERM};_ratioRareMax={RatioHyper};_c={C};_Alpha={Alpha};_Seed={SEED}_.thesis', 'wb') as f:
                                     pickle.dump([F1_score ,allParamaters],f)
                                     
                             #paraPickleSaverBASE(clf)
@@ -457,9 +458,11 @@ for WordvecModel in WordvecModelList:
                                 F1_score = None
                                 TnTp = None
                                 C=None
+                                Alpha = None
                                 if clf == nb_classifier:
                                     F1_score = F1_score_enriched_mnb
                                     TnTp = TNψfn_nb_enriched
+                                    Alpha = nb_classifier.get_params()['alpha']
                                 elif clf == svm_classifier:
                                     F1_score = F1_score_enriched_SVM
                                     TnTp = TNψfn_svm_enriched
@@ -472,7 +475,7 @@ for WordvecModel in WordvecModelList:
                                 TIME = datetime.now().strftime("_%d-%h-%H;%M;%S")
                                 PATH = 'C:\\Users\Sa\\WD_thesisPython_workdrive\\Text_Classification_Pipeline\\'
                                 # here I could add in {} WHAT I want to SHOW UP IN FILENAME.. COEFS AND METRICS.. ?WRITE TO EXCEL FILE?
-                                with open(PATH+f'{TIME};_Enriched_f1={F1_score};_TnTp={TnTp};_CLF={CLF_name};__{VECTORIZER_TYPE};_max_features={MAX_FEATURES};_ngram={NGRAM_RANGE};_max_df={MAX_DF};_min_df={MIN_DF};__similar={SIMILARITY_HYPERPARA};_rareterm={RARETERM};_ratioRareMax={RatioHyper};_c={C}_enriched={Enriched_percentage};__topn={TOP_NEIGHBORS};_d={DIMENSION};_Seed={SEED};_{WORDVEC_TYPE}_.thesis', 'wb') as f:
+                                with open(PATH+f'{TIME};_Enriched_f1={F1_score};_TnTp={TnTp};_CLF={CLF_name};__{VECTORIZER_TYPE};_max_features={MAX_FEATURES};_ngram={NGRAM_RANGE};_max_df={MAX_DF};_min_df={MIN_DF};__similar={SIMILARITY_HYPERPARA};_rareterm={RARETERM};_ratioRareMax={RatioHyper};_c={C};_Alpha={Alpha};_enriched={Enriched_percentage};_topn={TOP_NEIGHBORS};_d={DIMENSION};_Seed={SEED};_{WORDVEC_TYPE}_.thesis', 'wb') as f:
                                     pickle.dump([F1_score ,allParamaters],f)
                             
                             # =============================================================================

@@ -1,32 +1,38 @@
+##
+### =============================================================================
+### Importing libraries
+### =============================================================================
 #
-## =============================================================================
-## Importing libraries
-## =============================================================================
-##nlp essentials:
+#
+#import en_core_web_sm
+#nlp = en_core_web_sm.load(disable=["tagger", "parser", "ner"]) #DISABLE NER IF NOT NECESSARY, LOTS OF MEMORY REQUIREMENTS
+#
+#
+#def my_cleaner4(text):
+#        return[token.lemma_ for token in nlp(text) if not (token.is_stop or token.is_alpha==False or len(token.lemma_) <3) ]
+#        
+##to see which words are filtered out because they are stop words:
+##from spacy.lang.en.stop_words import STOP_WORDS
+#
+#from sklearn.feature_extraction.text import TfidfVectorizer
+#from sklearn.feature_extraction.text import CountVectorizer
+#
+## wordvec (GloVe) model:
+#import numpy as np
+#plt.style.use('ggplot')
+#from sklearn.manifold import TSNE
+#from gensim.test.utils import datapath, get_tmpfile
+#from gensim.models import KeyedVectors
+#from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014; 400kTerms
+##loading the word vectors
+#GLOVE_FILE = datapath("C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.50d.txt")
+#WORD2VEC_GLOVE_FILE = get_tmpfile("glove.6B.50d.txt") # specify which d file is used here
+#glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
+##model:
+#model = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
 
+#from sklearn.naive_bayes import MultinomialNB
 
-
-import en_core_web_sm # the english spacy core (sm = small database)
-# for installing spacy & en_core; https://spacy.io/usage
-
-# wordvec (GloVe) model:
-import numpy as np
-#%matplotlib notebook
-import matplotlib.pyplot as plt
-plt.style.use('ggplot')
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
-from gensim.test.utils import datapath, get_tmpfile
-from gensim.models import KeyedVectors
-from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014; 400kTerms
-
-#loading the word vectors
-GLOVE_FILE = datapath("C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.50d.txt")
-WORD2VEC_GLOVE_FILE = get_tmpfile("glove.6B.50d.txt") # specify which d file is used here
-glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
-
-#model:
-model = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
 
 
 
@@ -39,48 +45,17 @@ STRING = '''chinese beijing
 chinese chinese shanghai macao
 chinese macao japan shanghai
 tokyo japan chinese
-japan hiroshima hiroshima'''
+japan'''
+
 # side-obervation: Macau in doc 3 is the most informative word IDF
 
 
 #define labels because I want to add them to the df
 γTrain = ['chinese' , 'chinese' ,'chinese' , 'japanese']
     
-#STRING2 = '''I've been to Hollywood and redwood
-#I've been to Redwood
-#I've been a miner for a heart of gold'''
 
 Toy_corpus = STRING.splitlines()
     
-
-## experiment with n-gram model
-#def ngrams(words, n=2):
-#    for idx in range(len(words)-n+1):
-#        yield tuple(words[idx:idx+n])
-#for ngram in ngrams(Toy_corpus, n=1):
-#    print(ngram)
-#    
-#x = ngrams(Toy_corpus)
-
-
-
-import en_core_web_sm
-nlp = en_core_web_sm.load(disable=["tagger", "parser", "ner"]) #DISABLE NER IF NOT NECESSARY, LOTS OF MEMORY REQUIREMENTS
-
-
-def my_cleaner4(text):
-        return[token.lemma_ for token in nlp(text) if not (token.is_stop or token.is_alpha==False or len(token.lemma_) <3) ]
-        
-#to see which words are filtered out because they are stop words:
-#from spacy.lang.en.stop_words import STOP_WORDS
-
-#creating a token counts vectorizer:
-    # Convert a collection of text documents to a matrix of token counts
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
-
-
-
 
 # =============================================================================
 '4 Creating a term-document-Matrix FITTING THE VECTORIZER   '
@@ -91,16 +66,11 @@ print('\n fitting the vectorizer by inputing the corpus...')
 tdm = vectorizer.fit_transform(Toy_corpus)
 print('\n the vectorizer has been fit')
 Tdm_array = tdm.toarray()
-##ngrams:
-#vectorizer_Ngram = CountVectorizer(ngram_range=(2,2),tokenizer=my_cleaner4)
-#tdm_nGram=vectorizer_Ngram.fit(toy_corpus)
-#print (tdm_nGram.get_feature_names()  )
-#terms_bigrams = tdm_nGram.get_feature_names()
+
     
 #terms:
 Terms = vectorizer.get_feature_names()
 print(f'size of Vocabulary = {len(Terms)}\n')
-
 
 
 # terms+TFIDF in df:
@@ -110,30 +80,17 @@ TermsψcountValues = pd.DataFrame(Tdm_array,columns=Terms,index=['doc0(chi) WC:'
 
 
 
-
-# =============================================================================
-# 
-# =============================================================================
-#termsψcoefsψcountvalues # SO THAT I DONT forget; define this in section 6
-
-
 # =============================================================================
 ' 5 machine learning'
 # =============================================================================
 
-γTrain = ['chinese' , 'chinese' ,'chinese' , 'japanese']
 #import numpy as np
 #LabelsNumeric = np.array((1,0,0))
     
 #train/test subset
-import numpy as np
 χTrainVec =  np.array( TermsψcountValues.iloc[[0,1,2,3]] )
 
 
-# =============================================================================
-# Multinominal Naive Bayes MNB
-# =============================================================================
-from sklearn.naive_bayes import MultinomialNB
 #mnb_model=MultinomialNB() # ~==↓
 mnb_model= MultinomialNB(alpha= 0.1, fit_prior = True, class_prior = (0.5,0.5) ) # apt the order of which class_prior paramters, are the order of: mnb_model.classes_
 
@@ -170,8 +127,6 @@ print(termsψcoefsψcountvaluesψconditionalProbs, '\n\n ↑termsψcoefsψcountv
 # the coefs for a word are the same as the probabilities of that word occuring, if the other class is observed
  
 
-
-
 #!!!======================================================================== #
 'Recreating HEAP METHOD for Enriching BOW        '
 #======================================================================== #
@@ -186,17 +141,16 @@ construct new BOW vector where neigbors are +1, other terms untouched →
 # Scenario in which the baseline model is used: no intermediate wordvector model:
 # =============================================================================
 
-                            
+# so if this test-vector including beijing, which has neighbor: 'shanghai' is enriched with shanghai; it wll be heavily probabilitized towards class=chinese; does that seem justified?:
+    # if eg shanghai is not present in the test_vector, and that term is very close to a term in the  test set that is a rare term for that class thus counting little towards the probability towards that class; one could say that in actuality that term is sort of a placeholder for the neighboring=similar term that does occur many times in that class, little in opposing class therefore providing a lot of evidence for the test-text being classified as that class
+    # explanation wh it matters for outcome: the more common shanghai is in chinese classes |\ more rare in japanese classes; the higher the likelihood for class chinese &_by_def?: the lower the likelihood for class japanuse →→→ hence the greater the "probability gap" between that word counting towards chinese vs japanese:
 rare_test = '''beijing chinese japan hiroshima
-chinese bejing macao tokyo'''.splitlines()                            
-# SO IF THIS TEST-VECTOR INCLUDING BEIJING, WHICH HAS NEIGHBOR: 'SHANGHAI' IS ENRICHED WITH SHANGHAI; IT WLL BE HEAVILY PROBABILITIZED TOWARDS CLASS=CHINESE; DOES THAT SEEM JUSTIFIED?:
-    # IF EG SHANGHAI IS NOT PRESENT IN THE TEST_VECTOR, AND THAT TERM IS VERY CLOSE TO A TERM IN THE  TEST SET THAT IS A RARE TERM FOR THAT CLASS THUS COUNTING LITTLE TOWARDS THE PROBABILITY TOWARDS THAT CLASS; ONE COULD SAY THAT IN ACTUALITY THAT TERM IS SORT OF A PLACEHOLDER FOR THE NEIGHBORING=SIMILAR TERM THAT DOES OCCUR MANY TIMES IN THAT CLASS, LITTLE IN OPPOSING CLASS THEREFORE PROVIDING A LOT OF EVIDENCE FOR THE TEST-TEXT BEING CLASSIFIED AS THAT CLASS
-    # EXPLANATION WH IT MATTERS FOR OUTCOME: tHE MORE COMMON SHANGHAI IS IN CHINESE CLASSES |\ MORE RARE IN JAPANESE CLASSES; THE HIGHER THE LIKELIHOOD FOR CLASS CHINESE &_BY_DEF?: THE LOWER THE LIKELIHOOD FOR CLASS JAPANUSE →→→ HENCE THE GREATER THE "PROBABILITY GAP" BETWEEN THAT WORD COUNTING TOWARDS CHINESE VS JAPANESE
-
+chinese bejing macao tokyo'''.splitlines()  
+x_test = pd.DataFrame(vectorizer.transform(rare_test).toarray())
+x_test.columns= vectorizer.get_feature_names()
 # =============================================================================
 # Scenario before enrichment:
 # =============================================================================
-x_test = vectorizer.transform(rare_test).toarray()
 
 ŷ = mnb_model.predict(x_test) #  the predicted class
 print('the predicted classes:',ŷ)
@@ -207,13 +161,10 @@ print ('\n\n with the para:', mnb_model)
 
 
 #!!!=============================================================================
-#Enriching the Rare and out of vocab words:
+#Enriching the Rare words
 #I NOW FORMULATED A MINIMUM SIMILARIT SCORE (NOT SAME AS HEAP)
 # ============================================================================
 
-#model.similar_by_word('hiroshima', topn= 40)
-
-#PROTOTYPE 2
 df = termsψcoefsψcountvaluesψconditionalProbs.iloc[1:6]
 df_test = pd.DataFrame(x_test,columns=vectorizer.get_feature_names()) #test df
 df_enriched = df_test.replace(df_test, 0) #creating the (here) empty enriched BOW

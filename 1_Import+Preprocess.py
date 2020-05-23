@@ -1,17 +1,74 @@
 
+#======================================================================== #
+' importing our watched        '
+#======================================================================== #
+ #
+
+#loading from disk:
+import pickle
+with open('ourwatchedset_data_RAF.pickle','rb') as f:  # Python 3: open(..., 'rb')
+   raf = pickle.load(f)
+
+#storing rafs file in df:
+import pandas as pd
+df = pd.DataFrame(raf,columns=['id','transcripts','labels'])
+df = df.drop(df.index[0]) #because those are column name
+del df['transcripts'] # because those are rafs tokenized transcripts
+
+
+#sort values = keys:
+df = df.sort_values(['id'])
+
+
+
+
+#loading my own transcripts in json
+import json 
+# Opening JSON file 
+f = open('ourWatched_Youtube_videos_Transcriptsψkeys.json') 
+siebe = json.load(f) 
+
+siebe = dict(sorted(siebe.items()))
+transcripts = list(siebe.values())
+df['transcripts']=transcripts# and adding my transcripts, which are not tokenized
+
+#end result
+transcripts_selfWatched = list(df.transcripts)
+labels_selfWatched = list(df.labels)
+
+
+#to disk:
+import pickle
+with open('transandLabels_selfWatched.pkl', 'wb') as f:  # Python 3: open(..., 'wb')
+    pickle.dump([transcripts_selfWatched, labels_selfWatched], f)
+
+
+#loading from disk:
+import pickle
+with open('transandLabels_selfWatched.pkl','rb') as f:  # Python 3: open(..., 'rb')
+   x_testTest, y_testTest = pickle.load(f)
 
 #======================================================================== #
 ' 1.1 import df1: dup df: transcripts, labels (and lengths words       '
-#======================================================================== #
+#========================================================================
+
 
 # import the json file containing file were duplicatives already are taken care of
 import pandas as pd
-df1_NoDuplicatives = pd.read_json('df1_NoDuplicatives.json')
+df1_NoDuplicatives = pd.read_json('z_df1_NoDuplicatives.json')
 #reset index so that the old-duplicates-indices are dealt with:
 df1_NoDuplicatives = df1_NoDuplicatives.reset_index() #could drop it with: drop=True
 #setting column names:
 df1_NoDuplicatives.columns = ['ids', 'transcripts', 'labels', 'wordLengths']
 
+
+
+# for the testtest:
+import numpy as np
+
+import pandas as pd
+df = pd.DataFrame((x_testTest,y_testTest)).transpose()
+df.columns = ['transcripts','labels']
 
 
 # =============================================================================
@@ -29,21 +86,23 @@ Re_matchlist = []
 import re
 Regex = r"\[[^]]+\]"#this pattern removes tokens sa '[music]' 
 II=0
-for String in df1_NoDuplicatives.transcripts: 
+for String in df.transcripts: 
     MATCHLIST = re.findall(Regex, String)
+    print(MATCHLIST)
     
     # and removing the bracket words
     TOKENS = String.split()
     TOKENS  = [word for word in TOKENS if word not in MATCHLIST]
     CleanedString = ' '.join(TOKENS)
-    df1_NoDuplicatives.transcripts[II] = CleanedString
+    df.transcripts[II] = CleanedString
     Re_matchlist.append((II,MATCHLIST))
     II+=1
 print(Re_matchlist, '\n\n↑ these tokens in the enumerated transcripts have been removed')
 
 #test if the cleaning it was effective
-print('soft music' in str(df1_NoDuplicatives.transcripts))
-print('know' in str(df1_NoDuplicatives.transcripts))
+print('soft music' in str(df.transcripts))
+print('[Music]' in str(df.transcripts))
+print('know' in str(df.transcripts))
 
 ## NOT NECESSAry, but this is to locate their position
 #matches = re.find(Regex, String, re.MULTILINE)
