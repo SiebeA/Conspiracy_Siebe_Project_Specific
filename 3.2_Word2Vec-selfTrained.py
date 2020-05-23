@@ -4,14 +4,6 @@ Import libraries to build Word2Vec model
 from gensim.models import Word2Vec
 from gensim.models.phrases import Phraser, Phrases
 
-
-
-The end result is : A LIST OF 2_sentences3, WITH EACH SENTENCE BEING A LIST OF WORDS, FOR EXAMPLE:
-input_data = [
-       ['This', 'is', 'sentence', 'one'], 
-       ['And', 'this', 'is', 'sentence', 'two']]
-
-
 #TBD:
 '''
 
@@ -159,8 +151,3 @@ aa = modelW2V_selftrained.similar_by_word('illuminati',topn=25)
 import pandas as pd
 aa = pd.DataFrame(aa,columns=['word','similarity_score'])
 aa.to_clipboard() # easy to excel
-
-
-
-
-

@@ -1,5 +1,5 @@
 #======================================================================== #
-'  Deprecated Notes to be enhanced | Explored                         '
+'  Deprecated. Notes to be enhanced | Explored                         '
 #======================================================================== #
 
 'I can incorporate the vote balance, to see if certain pattersn (word counts/ ner counts, ner mentions) are associated with higher/lower vote balance'
