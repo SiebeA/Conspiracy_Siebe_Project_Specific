@@ -13,8 +13,8 @@ __Info on the files within the repository:__
   
   - the files startin with 'FE'='feature_Enrichment are the core of the feature_engineering process; eventually, their output models will also be input in the TextPipeline from step 3 (GridsearchCV) onwards (to equalize their hyperparamters wit the baseline model): then the results can be compared and the Research Question(RQ)--Can the use of external data improve the performance of a text classification model for detecting conspiratorial video transcripts on a small unbalanced dataset?--can be answered, as the models includes externally derived features, by which the original features are enriched. 
   
-  | __file/step__                    |   | __state__        |
-| -------------                     |:-------------:|
+  | __file/step__                    | __State__   | __comments__        |
+| -------------                     |:-------------:|       |
 | 1_Import+Preprocess.py            |done|; for importing transcripts, labels, etc  | 
 | 2.0_vectorization_BOW&split.py    |done| for vectorization; Gridsearch-system=setup: (close) to optimal hyperparamaters are found with gridsearch on a literally uncountable nr of simulations | 
 | 2.5_Analysis.py                   |done|not relevant for end-result; but I used it for EDA & observing the results of changes in HyperParamaters     |
