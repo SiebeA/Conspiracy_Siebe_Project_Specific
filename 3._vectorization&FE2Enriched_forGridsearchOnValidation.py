@@ -29,32 +29,28 @@ import time
 # =============================================================================
 # #loading the word vectors models
 # =============================================================================
-#GLOVE
-DIMENSION = '200'+'d'
-GLOVE_FILE = datapath(f"C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.{DIMENSION}.txt")
-WORD2VEC_GLOVE_FILE = get_tmpfile(f"glove.6B.{DIMENSION}.txt") # specify which d file is used here
-glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
-#model:
-gloveModel = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
 
 
-#SMALL SELFTRAINED MODEL
-with open('selfTrainedWord2vec3.pkl','rb') as f:  # Python 3: open(..., 'rb')
-    selfTrainedw2vModel_small = pickle.load(f)
-print(len(selfTrainedw2vModel_small.wv.vocab))
-
-
-#BIG SELFTRAINED MODEL
-with open('selfTrainedWord2vec4BIG.pkl','rb') as f:  # Python 3: open(..., 'rb')
-    selfTrainedw2vModel_big = pickle.load(f)
-print(len(selfTrainedw2vModel_big.wv.vocab))
-
-
-from sklearn.model_selection import train_test_split
-from collections import Counter # calculating the label distribution:
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
-from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
-from sklearn import svm        
+##GLOVE
+#DIMENSION = '200'+'d'
+#GLOVE_FILE = datapath(f"C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.{DIMENSION}.txt")
+#WORD2VEC_GLOVE_FILE = get_tmpfile(f"glove.6B.{DIMENSION}.txt") # specify which d file is used here
+#glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
+##model:
+#gloveModel = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
+#
+#
+##BIG SELFTRAINED MODEL
+#with open('pickle\\selfTrainedWord2vec4BIG.pkl','rb') as f:  # Python 3: open(..., 'rb')
+#    selfTrainedw2vModel_big = pickle.load(f)
+#print(len(selfTrainedw2vModel_big.wv.vocab))
+#
+#
+#from sklearn.model_selection import train_test_split
+#from collections import Counter # calculating the label distribution:
+#from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
+#from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
+#from sklearn import svm        
 
 
 #======================================================================== #
@@ -112,8 +108,8 @@ SEED = 7 # used to be 7
 
 # looping through the specified gridsearch hyperparas:
 for WordvecModel in WordvecModelList:
-    if WordvecModel == selfTrainedw2vModel_small: # all for right name in file
-        WORDVEC_TYPE = 'selfsmall'
+    if WordvecModel == selfTrainedw2vModel_big: # all for right name in file
+        WORDVEC_TYPE = 'self'
     elif WordvecModel == gloveModel:
         WORDVEC_TYPE = 'Glove'
  
@@ -399,6 +395,8 @@ for WordvecModel in WordvecModelList:
                             #!!!======================================================================== #
                             ' saving results and paras, somehow, (function cant gather vectorizer, doesnt work if i load them, therefore just putting them here:)      '
                             #======================================================================== #
+                            
+                            
                             # function for storing the baseline results of the 2 clfs in pickle hereafter
                             def paraPickleSaverBASE(clf):
                                 '''for the baseline tracks; both Nb & svm'''
@@ -429,7 +427,7 @@ for WordvecModel in WordvecModelList:
                                 TIME = datetime.now().strftime("_%d-%h-%H;%M;%S")
                                 PATH = 'C:\\Users\Sa\\WD_thesisPython_workdrive\\Text_Classification_Pipeline\\'
                                 # here I could add in {} WHAT I want to SHOW UP IN FILENAME.. COEFS AND METRICS.. ?WRITE TO EXCEL FILE?
-                                with open(PATH+f'{TIME};_Base_____f1={F1_score};_TnTp={TnTp};_CLF={CLF_name};__{VECTORIZER_TYPE};_max_features={MAX_FEATURES};_ngram={NGRAM_RANGE};_max_df={MAX_DF};_min_df={MIN_DF};__similarity={SIMILARITY_HYPERPARA};_rareterm={RARETERM};_ratioRareMax={RatioHyper};_c={C};_Alpha={Alpha};_Seed={SEED}_.thesis', 'wb') as f:
+                                with open(PATH+f'{TIME};_Base_____f1={F1_score};_TnTp={TnTp};_CLF={CLF_name};__{VECTORIZER_TYPE};MF={MAX_FEATURES};_ngram={NGRAM_RANGE};_max_df={MAX_DF};_min_df={MIN_DF};__similarity={SIMILARITY_HYPERPARA};_rareterm={RARETERM};_ratio={RatioHyper};_c={C};_α={Alpha};_Seed={SEED}_.thesis', 'wb') as f:
                                     pickle.dump([F1_score ,allParamaters],f)
                                     
                             #paraPickleSaverBASE(clf)
@@ -465,7 +463,7 @@ for WordvecModel in WordvecModelList:
                                 TIME = datetime.now().strftime("_%d-%h-%H;%M;%S")
                                 PATH = 'C:\\Users\Sa\\WD_thesisPython_workdrive\\Text_Classification_Pipeline\\'
                                 # here I could add in {} WHAT I want to SHOW UP IN FILENAME.. COEFS AND METRICS.. ?WRITE TO EXCEL FILE?
-                                with open(PATH+f'{TIME};_Enriched_f1={F1_score};_TnTp={TnTp};_CLF={CLF_name};__{VECTORIZER_TYPE};_max_features={MAX_FEATURES};_ngram={NGRAM_RANGE};_max_df={MAX_DF};_min_df={MIN_DF};__similar={SIMILARITY_HYPERPARA};_rareterm={RARETERM};_ratioRareMax={RatioHyper};_c={C};_Alpha={Alpha};_enriched={Enriched_percentage};_topn={TOP_NEIGHBORS};_d={DIMENSION};_Seed={SEED};_{WORDVEC_TYPE}_.thesis', 'wb') as f:
+                                with open(PATH+f'{TIME};_Enriched_f1={F1_score};_TnTp={TnTp};_CLF={CLF_name};__{VECTORIZER_TYPE};MF={MAX_FEATURES};_ngram={NGRAM_RANGE};_max_df={MAX_DF};_min_df={MIN_DF};__similar={SIMILARITY_HYPERPARA};_rareterm={RARETERM};_ratio={RatioHyper};_c={C};_α={Alpha};_enriched={Enriched_percentage};_topn={TOP_NEIGHBORS};_d={DIMENSION};_Seed={SEED};_{WORDVEC_TYPE}_.thesis', 'wb') as f:
                                     pickle.dump([F1_score ,allParamaters],f)
                             
                             # =============================================================================
