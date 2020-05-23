@@ -56,8 +56,9 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
 from sklearn import svm        
 
+
 #======================================================================== #
-' import the output of 1_preprocessing        '
+' import the the data from 1_preprocessing        '
 #======================================================================== #
 #THESE ARE WITH THE LABELS 0-1
 with open('pickle\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
@@ -68,22 +69,19 @@ with open('pickle\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjust
 #======================================================================== #
 '  !!! hyperpara definition / gridsearch definition       '
 #======================================================================== #
+
+
+#hypers for WordvectorModesl
 WordvecModelList = [selfTrainedw2vModel_big]# , gloveModel ]
-
-    
-
 RATIOHYPERLIST = [0.3]# determines the ratio of rareterms/maxfeatures: i.e. 0.3 = 30% of the max features is the absolute rare term integer: eg 100 max features * 0.3 = rareterm = 30; this is because the ratio determines the enrichement %; now it is robust, if max feature changes, there is no problem
-
-
 SIMILARITY_HYPERPARA_LIST = [0]#, 0.5, 0.6 , 0.7] # APT LESS IMPORTANT SINCE THE ENRICHMENT EXPRESSION INCLUDES MULTIPLICATION WITH THE SIMILARITY
-
 TOP_NEIGHBORS_list = [50]
 
 # =============================================================================
-# #hypers for classifying
+# #hypers for classifieres
 # =============================================================================
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
-nb_classifier = MultinomialNB()
+nb_classifier = MultinomialNB(alpha=1)
 
 # =============================================================================
 # hypers for vectorization
@@ -93,7 +91,6 @@ Vectorizer= TfidfVectorizer
 MAXFEATURES = [4000]#,12000,28000,5000,10000,15000,25000,30000,35000]#,16000,21000,18000,19000,17000,25000,8000]#, 15000,20000,25000,30000,32324]# 4000, 5000, 6000]
 MAX_DF_LIST = [0.9]
 MIN_DF = 1
-
 #DIMENSIONLIST = ['200'+'d']#,'100'+'d']
 
 SEED = 7 # used to be 7
@@ -117,12 +114,9 @@ SEED = 7 # used to be 7
 for WordvecModel in WordvecModelList:
     if WordvecModel == selfTrainedw2vModel_small: # all for right name in file
         WORDVEC_TYPE = 'selfsmall'
-    elif WordvecModel == selfTrainedw2vModel_big:
-        WORDVEC_TYPE = 'selfBIG'
     elif WordvecModel == gloveModel:
         WORDVEC_TYPE = 'Glove'
-
-    
+ 
     for MAXFEATURE in MAXFEATURES:
         for SIMILARITY_HYPERPARA in SIMILARITY_HYPERPARA_LIST:
             for MAX_DF in MAX_DF_LIST:
@@ -191,7 +185,7 @@ for WordvecModel in WordvecModelList:
                         COUNTwhole,COUNTtest  = Counter(Y) ,Counter(y_test)
                         print( '\nCounting labels:\n whole dataset:',COUNTwhole,'ratio label 2 in whole Y',COUNTwhole[1]/(COUNTwhole[0]+COUNTwhole[1]),'\n train:',Counter(y_train),'\n test:',Counter(y_test), '\nratio label 2 in y_test:', COUNTtest[1]/(COUNTtest[0]+COUNTtest[1]) )
                         
-                        
+
                         # =============================================================================
                         '''enriching the Rare and out of vocab words:'''
                         # ============================================================================
@@ -229,13 +223,11 @@ for WordvecModel in WordvecModelList:
             # HYPER PARAMATER                                        
             # =============================================================================
                                             else:
-                                                
+       
                                                 NEIGHBORS_NOTINBUILDING.append(NEIGHBOR[0])
                                 print (" %s secs" % round((time.time() - START_TIME),0))
                                 print(f'len neighbors = {len(NEIGHBORS)}')
                                 print(f'len unique neighbors = {len(set(NEIGHBORS))}')
-                                
-            
                             except KeyError:
                                 print(KeyError, TERM)
                                 pass
@@ -267,7 +259,6 @@ for WordvecModel in WordvecModelList:
                         print(f' \n the difference of nonzero values in whole df as result of enrichment:\n {abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated))} \n compared to a total of {df_test.shape[0] * df_test.shape[1]} cells in the df \n that difference is  {Enriched_percentage} percent of total values in the BOW ')
                         
                         
-            
                         # =============================================================================
                         # remember the vect paras:
                         # =============================================================================
@@ -278,7 +269,6 @@ for WordvecModel in WordvecModelList:
                             try: del vectorization_parasFiltered[KEY]
                             except:         pass
                         
-    
             #======================================================================== #
             #''' Classifying        '''
             #======================================================================== #
@@ -407,7 +397,7 @@ for WordvecModel in WordvecModelList:
                             
                             
                             #!!!======================================================================== #
-                            ' saving results and paras, somehow, function dont work if i load them, therefore just putting them here:      '
+                            ' saving results and paras, somehow, (function cant gather vectorizer, doesnt work if i load them, therefore just putting them here:)      '
                             #======================================================================== #
                             # function for storing the baseline results of the 2 clfs in pickle hereafter
                             def paraPickleSaverBASE(clf):

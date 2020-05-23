@@ -25,7 +25,7 @@
 #from gensim.models import KeyedVectors
 #from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014; 400kTerms
 ##loading the word vectors
-#GLOVE_FILE = datapath("C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.50d.txt")
+#GLOVE_FILE = datapath("C:\Users\Sa\Google_Drive\0_Education\1_Masters\WD_jupyter\wordVectors\glove.6B.50d.txt")
 #WORD2VEC_GLOVE_FILE = get_tmpfile("glove.6B.50d.txt") # specify which d file is used here
 #glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
 ##model:
@@ -58,9 +58,12 @@ Toy_corpus = STRING.splitlines()
     
 
 # =============================================================================
-'4 Creating a term-document-Matrix FITTING THE VECTORIZER   '
+'4 VECTORIZING  '
 # =============================================================================
-vectorizer=TfidfVectorizer(tokenizer=my_cleaner4)
+#vectorizer=TfidfVectorizer(tokenizer=my_cleaner4)
+vectorizer=CountVectorizer(tokenizer=my_cleaner4)
+
+
 print(f'the vectorizer has been created, and it specifically involves a:\n      {str(type(vectorizer))[-17:-2]}')
 print('\n fitting the vectorizer by inputing the corpus...')
 tdm = vectorizer.fit_transform(Toy_corpus)
@@ -88,7 +91,7 @@ TermsψcountValues = pd.DataFrame(Tdm_array,columns=Terms,index=['doc0(chi) WC:'
 #LabelsNumeric = np.array((1,0,0))
     
 #train/test subset
-χTrainVec =  np.array( TermsψcountValues.iloc[[0,1,2,3]] )
+xTrainVec =  np.array( TermsψcountValues.iloc[[0,1,2,3]] )
 
 
 #mnb_model=MultinomialNB() # ~==↓
@@ -96,7 +99,7 @@ mnb_model= MultinomialNB(alpha= 0.1, fit_prior = True, class_prior = (0.5,0.5) )
 
 
 print (f'\n mnb_model.class_prior is specified as: {mnb_model.class_prior}... ') # this works before fitting
-mnb_model.fit(χTrainVec, γTrain)
+mnb_model.fit(xTrainVec, γTrain)
 print ('which results in a class prior of: ', np.exp(mnb_model.class_log_prior_  ) ) # this only works after fitting
 print('\n respecively for the classes:',mnb_model.classes_)
 # use the EXP (invese log / euler) to convert the log back to probabilities:
@@ -130,7 +133,7 @@ print(termsψcoefsψcountvaluesψconditionalProbs, '\n\n ↑termsψcoefsψcountv
 #!!!======================================================================== #
 'Recreating HEAP METHOD for Enriching BOW        '
 #======================================================================== #
-
+ 
 
 '''                 Description of method:
 test data →→→ 
@@ -143,12 +146,21 @@ construct new BOW vector where neigbors are +1, other terms untouched →
 
 # so if this test-vector including beijing, which has neighbor: 'shanghai' is enriched with shanghai; it wll be heavily probabilitized towards class=chinese; does that seem justified?:
     # if eg shanghai is not present in the test_vector, and that term is very close to a term in the  test set that is a rare term for that class thus counting little towards the probability towards that class; one could say that in actuality that term is sort of a placeholder for the neighboring=similar term that does occur many times in that class, little in opposing class therefore providing a lot of evidence for the test-text being classified as that class
-    # explanation wh it matters for outcome: the more common shanghai is in chinese classes |\ more rare in japanese classes; the higher the likelihood for class chinese &_by_def?: the lower the likelihood for class japanuse →→→ hence the greater the "probability gap" between that word counting towards chinese vs japanese:
-rare_test = '''beijing chinese japan hiroshima
-chinese bejing macao tokyo'''.splitlines()  
-x_test = pd.DataFrame(vectorizer.transform(rare_test).toarray())
-x_test.columns= vectorizer.get_feature_names()
-# =============================================================================
+    # explanation wh it matters for outcome: the more common shanghai is in chinese classes | more rare in japanese classes; the higher the likelihood for class chinese &_by_def?: the lower the likelihood for class japanese →→→ hence the greater the "probability gap" between that word counting towards chinese vs japanese:
+rareψOov_test = '''beijing chinese japan hiroshima
+chinese beijing macao tokyo'''.splitlines()
+
+#transform only
+x_test = vectorizer.transform(rareψOov_test).toarray()
+df_test = pd.DataFrame(x_test, columns = vectorizer.get_feature_names() )
+#fit_transfform
+x_test = vectorizer.fit_transform(rareψOov_test).toarray()
+df_test = pd.DataFrame(x_test, columns = vectorizer.get_feature_names() )
+
+vectorizer.get_feature_names()
+vectorizer.fixed_vocabulary_
+
+#!!!=============================================================================
 # Scenario before enrichment:
 # =============================================================================
 
@@ -167,22 +179,26 @@ print ('\n\n with the para:', mnb_model)
 
 df = termsψcoefsψcountvaluesψconditionalProbs.iloc[1:6]
 df_test = pd.DataFrame(x_test,columns=vectorizer.get_feature_names()) #test df
-df_enriched = df_test.replace(df_test, 0) #creating the (here) empty enriched BOW
+
+Enriched_array = np.array(df_test)
+Enriched_array[Enriched_array > 0] = 0  #creating the (here) empty enriched BOW
+df_enriched = pd.DataFrame(Enriched_array,columns = vectorizer.get_feature_names())
 
 import time
 START_TIME = time.time()
 
 for DOCINDEX in range(len( df_test)): # loops through each of the docs
-    print(DOCINDEX)
+    print('\n',DOCINDEX)
     for TERM in df_test: #loops through each of the terms, of each of the doc
-#        print(TERM)
+        print(TERM)
         if df_test.iloc[DOCINDEX][TERM]>0 and np.count_nonzero(df[TERM]) <= 1: #checks how many non0/occurences the term has along all docs in training
-            print(f'\n "{TERM}" satisfies the "rare word paramater"')
+            print(f' "{TERM}" satisfies the "rare word paramater"')
+            
             
             for NEIGHBOR in model.similar_by_word(TERM, topn= 10): #SET 'K' NEIGHBORs HYPERPARAMATER
                 if NEIGHBOR[1]>0.8 and NEIGHBOR[0] in df.columns:
 
-                    print(f'TERM:{TERM} \n NEIGHBOR:{NEIGHBOR[0]} with a similarity of {NEIGHBOR[1]}')
+                    print(f'\n NEIGHBOR:{NEIGHBOR[0]} with a similarity of {NEIGHBOR[1]}')
                     df_enriched.iloc[DOCINDEX][NEIGHBOR[0]] += NEIGHBOR[1] * df_test.iloc[DOCINDEX][TERM]  #adding a value that is the product of the similarity score * the value of the TERM in the respective DOC, to the NEIGHBOR of the rare term in the DOC where the rare term occurs: 
 
 
