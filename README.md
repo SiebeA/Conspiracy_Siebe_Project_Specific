@@ -3,7 +3,7 @@
 # Conspiracy_Siebe_Project_Specific
 
 update: may 23)
-- Highest macro-f1 on validation:  ; 0.82 (GloVe model) vs 0.48 baseline
+- Highest macro-f1 on validation:  ; 0.82 (GloVe model) vs 0.72 baseline
 - highest macro-f1 on test-set (self watched videos) ; 0.63 (Glove model) vs 0.48 baseline
 
 **__TBD:__**
