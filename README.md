@@ -11,9 +11,11 @@ update: may 23)
 __Info on the files within the repository:__
   - the files that are numbered are subject to be executed within an order i.e. my text classification pipeline; their respective number is their place within that order. 
     - the files startin with 'FE'='feature_Enrichment are the core of the feature_engineering process; eventually, their output models will also be input in the TextPipeline from step 3
+    
 - files without a number are not part of the pipeline (pickle, readme, etc)
   
-  | __file/step__                    | __State__   | __comments__        |
+ 
+| __file/step__                    | __State__   | __comments__        |
 | -------------                     |:-------------:| ------      |
 | 1_Import+Preprocess.py            |done|; for importing transcripts, labels, etc  | 
 | 2.0_vectorization_BOW&split.py    |done| for vectorization; Gridsearch-system=setup: (close) to optimal hyperparamaters are found with gridsearch on a literally uncountable nr of simulations | 
