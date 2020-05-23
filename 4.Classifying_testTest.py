@@ -63,45 +63,49 @@
 #======================================================================== #
 WordvecModel = selfTrainedw2vModel_big
 #WordvecModel= gloveModel
+print('WordvecModel_len',len(WordvecModel.wv.vocab))
 
 # ↓ determines the ratio of rareterms/maxfeatures: i.e. 0.3 = 30% of the max features is the absolute rare term integer: eg 100 max features * 0.3 = rareterm = 30; this is because the ratio determines the enrichement %; now it is robust, if max feature changes, there is no problem
 RatioHyper = 0.3
 
 #INCLUDES MULTIPLICATION WITH THE SIMILARITY
-SIMILARITY_HYPERPARA = 0#, 0.5, 0.6 , 0.7] # APT LESS IMPORTANT SINCE THE ENRICHMENT EXPRESSION 
-
-TOP_NEIGHBORS=50
+SIMILARITY_HYPERPARA = 0#, 0.5, 0.6 , 0.7] # APT; the minium similarity of the neighbor, for it to be passed for check whether they are in vocabulary; LESS IMPORTANT SINCE THE ENRICHMENT EXPRESSION 
+TOP_NEIGHBORS=50 # close cousin of similarity_hyperparamater, the top x neighbors to be passed for check whether they are in the vocabulary
 
 # =============================================================================
 # #hypers for classifying
 # =============================================================================
-from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
+from sklearn.naive_bayes import MultinomialNB#, BernoulliNB, GaussianNB
 nb_classifier = MultinomialNB()
 
 # =============================================================================
 # hypers for vectorization
 # =============================================================================
 Vectorizer= TfidfVectorizer
-# LEMMA= 
-MAXFEATURE =4000#,12000,28000,5000,10000,15000,25000,30000,35000]#,16000,21000,18000,19000,17000,25000,8000]#, 15000,20000,25000,30000,32324]# 4000, 5000, 6000]
+MAXFEATURE =15000
 MAX_DF = 0.9
 MIN_DF = 1
 
 
+
 # =============================================================================
-# determining classifier input
+# modulating classifier and neighboring enrichment input (FIRST FIT VECTORIZER IN NEXT SECTION (put it here such that it is on top))
 # =============================================================================
-# Labels:
-y = y_testtest # for testset labels
-#y = y_validate # for validation labels
-# transcripts:
-X = x_vectesttest #testset trans
-#X = x_validate # validation trans
+a_dataset = 'validation'
 
+if a_dataset == 'validation':
+    y = y_validate #  validation labels
+    X = x_validate # validation transcripts
+    df_X_ValǀTest = pd.DataFrame(x_validate.toarray(),columns=vectorizer.get_feature_names()) #Validatin df
+elif a_dataset == 'test':
+    y = y_testtest # for testset labels
+    X = x_vectesttest #testset trans
+    df_X_ValǀTest = pd.DataFrame(x_vectesttest_array,columns=vectorizer.get_feature_names()) #test df
 
+#len(vectorizer.get_feature_names())
+#x_validate.shape
+#x_vectesttest_array.shape
 
-
-#DIMENSIONLIST = ['200'+'d']#,'100'+'d']
 
 
 #======================================================================== #
@@ -128,9 +132,6 @@ if WordvecModel == selfTrainedw2vModel_big:
 elif WordvecModel == gloveModel:
     WORDVEC_TYPE = 'Glove'
 
-    
-
-            #    for DIMENSION in DIMENSIONLIST:   # comment this to check for rare word length by maxfeatureX
                 
 #======================================================================== #
 ' BOW Vectorization; for classifiation input                         '
@@ -154,7 +155,7 @@ vectorizer.fit(Xǀtranscripts)
 #Transform seperately: # DOES NOT SHOW UP IN VARIABLE EXPLORER
 x_vec = vectorizer.transform(Xǀtranscripts) #whole internal corpus
 x_vec_array = x_vec.toarray()
-print( 'this many docs and features:', x_vec_array.shape)
+#print( 'this many docs and features:', x_vec_array.shape)
 
 
 # =============================================================================
@@ -186,26 +187,14 @@ for RARETERM in range(a_nonZero_CountColumnsǀterms.nonZeroCounts.max()):
 
 
 
-
-
-
 # =============================================================================
 '''enriching the Rare and out of vocab words:'''
 # ============================================================================
 
-# =============================================================================
-# #↓ MODULATE DEPENDING ON VALIDATION OR TEST
-# =============================================================================
-df_test = pd.DataFrame(x_vectesttest_array,columns=vectorizer.get_feature_names()) #test df
-#df_test = pd.DataFrame(x_validate,columns=vectorizer.get_feature_names()) #Validatin df
-
-
-# enrichment process:
-###Enriching the Test-vector with nearest neighbors:
-df = df4_x_vectorized # just for conenience
+df = df4_x_vectorized # just for convenience
 
 #creating the enriched df; here with all zero values
-ENRICHEDARRAY= np.array(df_test)
+ENRICHEDARRAY= np.array(df_X_ValǀTest)
 ENRICHEDARRAY[ENRICHEDARRAY > 0] = 0 # IT WAS >255 ?????? what weird has to be 0
 df_enriched = pd.DataFrame(ENRICHEDARRAY,columns=vectorizer.get_feature_names())
 
@@ -214,13 +203,13 @@ START_TIME1 = time.time()
 NEIGHBORS = []
 NEIGHBORS_NOTINBUILDING = []
 
-for DOCINDEX in range(len( df_test)): # loops through each of the docs
+for DOCINDEX in range(len( df_X_ValǀTest)): # loops through each of the docs
     try:
         print(DOCINDEX)
         START_TIME = time.time()
-        for TERM in df_test: #loops through each of the terms, of each of the doc
+        for TERM in df_X_ValǀTest: #loops through each of the terms, of each of the doc
     #        print(TERM)
-            if df_test.iloc[DOCINDEX][TERM]>0 and np.count_nonzero(df[TERM]) <= RARETERM: #former checks if the term in the testvocaublary occurs in the specific test instance; latter checks how many non0/occurences the term has along all docs in training
+            if df_X_ValǀTest.iloc[DOCINDEX][TERM]>0 and np.count_nonzero(df[TERM]) <= RARETERM: #former checks if the term in the testvocaublary occurs in the specific test instance; latter checks how many non0/occurences the term has along all docs in training
     #                print(f'\n rareterm: "{TERM}" is in test doc')
                 
 # =============================================================================
@@ -229,7 +218,7 @@ for DOCINDEX in range(len( df_test)): # loops through each of the docs
                     if NEIGHBOR[1]>SIMILARITY_HYPERPARA and NEIGHBOR[0] in df.columns:
                         NEIGHBORS.append(NEIGHBOR[0])
 # =============================================================================
-                        df_enriched.iloc[DOCINDEX][NEIGHBOR[0]] += NEIGHBOR[1] * df_test.iloc[DOCINDEX][TERM]#↑adding a value that is the product of the similarity score(NEIGHBOR[1] * the value of the TERM in the respective DOC(df_test.iloc[DOCINDEX][TERM]), to the NEIGHBOR of the rare term in the DOC where the rare term occurs
+                        df_enriched.iloc[DOCINDEX][NEIGHBOR[0]] += NEIGHBOR[1] * df_X_ValǀTest.iloc[DOCINDEX][TERM]#↑adding a value that is the product of the similarity score(NEIGHBOR[1] * the value of the TERM in the respective DOC(df_X_ValǀTest.iloc[DOCINDEX][TERM]), to the NEIGHBOR of the rare term in the DOC where the rare term occurs
 # HYPER PARAMATER                                        
 # =============================================================================
                     else:
@@ -254,21 +243,21 @@ print( len(NEIGHBORS) )
    # the enriched neighbors; from higehst to lowest TF IDF attribution
 aa_highest_enriched_neighbors = df_enriched.max().sort_values(ascending=False).reset_index()
 #printing the dfs:
-print('\n test df \n',df_test,'\n',)
+print('\n test df \n',df_X_ValǀTest,'\n',)
 
 print('\n df enriched df \n',df_enriched,'\n',)
 
-df_aggregated = df_test+df_enriched
+df_aggregated = df_X_ValǀTest+df_enriched
 print('\n aggregated df \n',df_aggregated,'\n',)
 
-df_difference = df_aggregated-df_test
+df_difference = df_aggregated-df_X_ValǀTest
 print('df difference:\n',df_difference)
 
 #the total nr of values change as a result of enrichment:
-print(f'\n total summed values: \n df_test.values: {df_test.values.sum()} \n df_aggregated.values.sum: {df_aggregated.values.sum()}' )
+print(f'\n total summed values: \n df_X_ValǀTest.values: {df_X_ValǀTest.values.sum()} \n df_aggregated.values.sum: {df_aggregated.values.sum()}' )
 
-Enriched_percentage = round(abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated)) /(df_test.shape[0] * df_test.shape[1])*100,1)
-print(f' \n the difference of nonzero values in whole df as result of enrichment:\n {abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated))} \n compared to a total of {df_test.shape[0] * df_test.shape[1]} cells in the df \n that difference is  {Enriched_percentage} percent of total values in the BOW ')
+Enriched_percentage = round(abs(np.count_nonzero(df_X_ValǀTest) - np.count_nonzero(df_aggregated)) /(df_X_ValǀTest.shape[0] * df_X_ValǀTest.shape[1])*100,1)
+print(f' \n the difference of nonzero values in whole df as result of enrichment:\n {abs(np.count_nonzero(df_X_ValǀTest) - np.count_nonzero(df_aggregated))} \n compared to a total of {df_X_ValǀTest.shape[0] * df_X_ValǀTest.shape[1]} cells in the df \n that difference is  {Enriched_percentage} percent of total values in the BOW ')
 
 
 
@@ -302,7 +291,7 @@ nb_classifier.fit(x_train,y_train) # model.set_params(onehot__threshold=3.0) if 
 ŷ_nb = nb_classifier.predict(X)
 
 cR_nbBase = classification_report(y,ŷ_nb, zero_division=0)
-print(cR_nbBase)
+print('\n',cR_nbBase)
 
 #for i,j in zip(y, ŷ_nb):    print(i==j)
 print('\n format of CM:\n', np.array([    ['TN', 'FP'],
@@ -473,7 +462,7 @@ def paraPickleSaverENRICHED(clf):
         C = svm_classifier.get_params()["C"]
         DEGREE = svm_classifier.get_params()["degree"]
         
-    print('\n f1 score:', F1_score, '\n tn tp:', TnTp, '\n _enriched%:',round(abs(np.count_nonzero(df_test) - np.count_nonzero(df_aggregated)) /(df_test.shape[0] * df_test.shape[1])*100),2)
+    print('\n f1 score:', F1_score, '\n tn tp:', TnTp, '\n _enriched%:',round(abs(np.count_nonzero(df_X_ValǀTest) - np.count_nonzero(df_aggregated)) /(df_X_ValǀTest.shape[0] * df_X_ValǀTest.shape[1])*100),2)
         
     from datetime import datetime
     TIME = datetime.now().strftime("_%d-%h-%H;%M;%S")
@@ -512,7 +501,7 @@ len(y)
 #for KEY in vectorization_parasFiltered.keys():print(KEY,'_'*(15-len(KEY)),vectorization_parasFiltered[KEY])
 #
 #perceptron
-#print( df_test.shape)
+#print( df_X_ValǀTest.shape)
 #from sklearn.linear_model import Perceptron
 #PERCEPTRON = Perceptron()
 #PERCEPTRON.fit(x_train, y_train)
@@ -524,12 +513,12 @@ len(y)
 #print('\n',confusion_matrix(y,ŷ_perceptron_enriched))
 #
 ##MNb    
-##print( df_test.shape)
+##print( df_X_ValǀTest.shape)
 ##print( df_aggregated.shape )
 ##nb_classifier = GaussianNB()  #=BernoulliNB() 
 #nb_classifier =MultinomialNB()
 #nb_classifier.fit(x_train, y_train)
-#ŷ_nb_classifier = nb_classifier.predict(df_test)
+#ŷ_nb_classifier = nb_classifier.predict(df_X_ValǀTest)
 #ŷ_nb_classifier_enriched = nb_classifier.predict(df_aggregated)
 #print('\n',classification_report(y_validate,ŷ_nb_classifier, zero_division=0))
 #print('\n',classification_report(y_validate,ŷ_nb_classifier_enriched, zero_division=0))
@@ -537,10 +526,10 @@ len(y)
 #print('\n',confusion_matrix(y_validate,ŷ_nb_classifier_enriched))
 #
 ##SVM    
-#print( df_test.shape)
+#print( df_X_ValǀTest.shape)
 #print( df_aggregated.shape )
 #svm_classifier.fit(x_train, y_train)
-#ŷ_svm_classifier = svm_classifier.predict(df_test)
+#ŷ_svm_classifier = svm_classifier.predict(df_X_ValǀTest)
 #ŷ_svm_classifier_enriched = svm_classifier.predict(df_aggregated)
 #print('\n',classification_report(y_validate,ŷ_svm_classifier, zero_division=0))
 #print('\n',classification_report(y_validate,ŷ_svm_classifier_enriched, zero_division=0))
