@@ -12,7 +12,7 @@ __Info on the files within the repository:__
   - the files that are numbered are part of the text classification pipeline; their respective number is their place within that order. 
     - the files startin with 'FE'='feature_Enrichment are the core of the feature_engineering process; eventually, their output models will also be input in the TextPipeline from step 3
     
-- files without a number are not part of the pipeline (pickle, readme, etc)
+- files without a number are not direclty relevant fort the pipeline (pickle, readme, etc)
   
  
 | __file/step__                    | __State__   | __comments__        |
