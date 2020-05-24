@@ -2,8 +2,7 @@
 
 # Conspiracy_Siebe_Project_Specific
 
-update: may 23)
-- Highest macro-f1 on validation:  ; 0.82 (GloVe model) vs 0.72 baseline
+update: may 24
 
 
 **__TBD:__**
