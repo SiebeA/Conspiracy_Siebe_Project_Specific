@@ -4,7 +4,7 @@
 
 update: may 23)
 - Highest macro-f1 on validation:  ; 0.82 (GloVe model) vs 0.72 baseline
-- highest macro-f1 on test-set (self watched videos) ; 0.63 (Glove model) vs 0.48 baseline
+
 
 **__TBD:__**
 ...
@@ -23,4 +23,4 @@ __Info on the files within the repository:__
 | 2.5_Analysis.py                   |done|not relevant for end-result; but I used it for EDA & observing the results of changes in HyperParamaters and feature engineering designs     |
 | 3.2_Word2Vec-selfTrained_onRedditConsp.py                 |done| 'the domain specific external corpus/dataset': 40k reddit comments are scraped, from which feature can be extracted (looking into possibility to use googleBigquery to download an even bigger dataset * update 23may: latter was succesfull, now the dataset is 1 MILION comments )
 | 3.3_vectorization&FE_Validation.py|done  | Gridsearch for hyperparamaters for vectorization, feature engineering and Classifier processes (ultimately, the hyperparamater set yielding highest validation result): 2 different models are creating from feature engineering(FE) a "general corpus": pretrained external wordVector model (GloVe wikipedia 2014 (400k terms); and a "specific corpus" on reddit, resulting in  ~213K terms|
-|4. classifying testtest |done |Script incorperating files before, with a fixed Hyperparamater set (best performing on validation) for testing on new data *update: we talked about using a different test-set, so test results will likely differ after having done that |
+|4. classifying testtest |done |Script incorperating files before, with a fixed Hyperparamater set (best performing on validation) for testing on new data *update*: we talked about using a different test-set, so test results will likely differ after having done that.  |
