@@ -35,8 +35,14 @@
 #glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
 ##model:
 #gloveModel = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
-#
-#
+
+
+## Google news:
+#from gensim.models import KeyedVectors
+## Load vectors directly from the file
+#Google_model = KeyedVectors.load_word2vec_format('wordvecmodels\\GoogleNews-vectors-negative300.bin', binary=True)
+
+
 ##BIG SELFTRAINED MODEL
 #with open('pickle\\selfTrainedWord2vec4BIG.pkl','rb') as f:  # Python 3: open(..., 'rb')
 #    selfTrainedw2vModel_big = pickle.load(f)
@@ -59,9 +65,23 @@
 
 
 #======================================================================== #
+''' TBD ↑ & TBE (to be experimented) experimenting:
+
+- train the model only on the training data, thus vocabulary is only training terms; as this mirrors the real life situation?
+
+- Try only to enrich unique neighbors
+- including the enrichment product hyper 
+- rare word need to be squared with max features
+- when rare words are too few in comparison to max features --> loop to next max feature
+- count the TP + TN for not having to do mental math
+- 
+'''
+
+
+#======================================================================== #
 '  !!! hyperpara definition    '
 #======================================================================== #
-WordvecModel = selfTrainedw2vModel_big
+WordvecModel = Google_model
 #WordvecModel= gloveModel
 print('WordvecModel_len',len(WordvecModel.wv.vocab))
 
@@ -82,60 +102,10 @@ nb_classifier = MultinomialNB()
 # hypers for vectorization
 # =============================================================================
 Vectorizer= TfidfVectorizer
-MAXFEATURE =15000
+MAXFEATURE =4000
 MAX_DF = 0.9
 MIN_DF = 1
 
-
-
-# =============================================================================
-# modulating classifier and neighboring enrichment input (FIRST FIT VECTORIZER IN NEXT SECTION (put it here such that it is on top))
-# =============================================================================
-a_dataset = 'validation'
-
-if a_dataset == 'validation':
-    y = y_validate #  validation labels
-    X = x_validate # validation transcripts
-    df_X_ValǀTest = pd.DataFrame(x_validate.toarray(),columns=vectorizer.get_feature_names()) #Validatin df
-elif a_dataset == 'test':
-    y = y_testtest # for testset labels
-    X = x_vectesttest #testset trans
-    df_X_ValǀTest = pd.DataFrame(x_vectesttest_array,columns=vectorizer.get_feature_names()) #test df
-
-#len(vectorizer.get_feature_names())
-#x_validate.shape
-#x_vectesttest_array.shape
-
-
-
-#======================================================================== #
-''' TBD ↑ & TBE (to be experimented) experimenting:
-
-- train the model only on the training data, thus vocabulary is only training terms; as this mirrors the real life situation?
-
-- Try only to enrich unique neighbors
-- including the enrichment product hyper 
-- rare word need to be squared with max features
-- when rare words are too few in comparison to max features --> loop to next max feature
-- count the TP + TN for not having to do mental math
-- 
-
-'''
-#======================================================================== #
-
-# looping through the specified gridsearch hyperparas:
-
-#if WordvecModel == selfTrainedw2vModel_small: # all for right name in file
-#    WORDVEC_TYPE = 'selfsmall'
-if WordvecModel == selfTrainedw2vModel_big:
-    WORDVEC_TYPE = 'selfBIG'
-elif WordvecModel == gloveModel:
-    WORDVEC_TYPE = 'Glove'
-
-                
-#======================================================================== #
-' BOW Vectorization; for classifiation input                         '
-#======================================================================== #
 vectorizer = Vectorizer(
  ngram_range=(1,1),
  tokenizer=my_cleaner_noLemma,
@@ -148,7 +118,6 @@ vectorizer = Vectorizer(
 # use_idf= None,
  lowercase=True) #True by default: Convert all characters to lowercase before tokenizing.
 
-    
 #fit on the whole corpus (this means that the vocabulary is extracted from the whole corpus)
 vectorizer.fit(Xǀtranscripts)
 
@@ -157,15 +126,51 @@ x_vec = vectorizer.transform(Xǀtranscripts) #whole internal corpus
 x_vec_array = x_vec.toarray()
 #print( 'this many docs and features:', x_vec_array.shape)
 
-
 # =============================================================================
-'classifyer input:'
+'splitting the vectorized dataset:'
 # =============================================================================
 SEED = 7 # used to be 7 # Note does not affact Test set, as there is nothing to split
 x_train, x_validate, y_train, y_validate  = train_test_split(x_vec, Yǀlabels, test_size=0.2, random_state=SEED, shuffle=True, stratify=Yǀlabels)
 
 
+# !!!=============================================================================
+# modulating classifier and neighboring enrichment input (FIRST FIT VECTORIZER IN NEXT SECTION (put it here such that it is on top))
+# =============================================================================
+len( vectorizer.get_feature_names() ) # because wrong data shapes error keeps appearing
+a_dataset = 'validation'
 
+if a_dataset == 'validation':
+    y = y_validate #  validation labels
+    X = x_validate # validation transcripts
+    df_X_ValǀTest = pd.DataFrame(x_validate.toarray(),columns=vectorizer.get_feature_names()) #Validatin df
+    x_validate.shape
+elif a_dataset == 'test':
+    y = y_testtest # for testset labels
+    X = x_vectesttest #testset trans
+    df_X_ValǀTest = pd.DataFrame(x_vectesttest_array,columns=vectorizer.get_feature_names()) #test df
+
+
+
+
+#len(vectorizer.get_feature_names())
+#x_validate.shape
+#x_vectesttest_array.shape
+
+
+#======================================================================== #
+
+# looping through the specified gridsearch hyperparas:
+
+#if WordvecModel == selfTrainedw2vModel_small: # all for right name in file
+#    WORDVEC_TYPE = 'selfsmall'
+if WordvecModel == selfTrainedw2vModel_big:
+    WORDVEC_TYPE = 'selfBIG'
+elif WordvecModel == gloveModel:
+    WORDVEC_TYPE = 'Glove'
+elif WordvecModel == Google_model:
+    WORDVEC_TYPE = 'google'
+
+                
 # =============================================================================
 #         Checking the number of rare terms: important, as if too few, little will be enriched
 # =============================================================================
