@@ -7,7 +7,7 @@ import numpy as np
 import pickle
 with open('pickle\\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
     X, Y,DF3_BINARIZEDLABELSΨLENADJUSTED,X_CONSONLY,X_NONCONSONLY = pickle.load(f)
-
+#x,y = X,Y
 
 print('some checks of cleaning processes outputs; \n -checking some cleaning: term in corpus?: ..:' )
 for I in ['[music]', '[Music]', '[soft music]']:print('term: ',I,'_'*(15-len(I)), I in str(X) )
@@ -31,7 +31,6 @@ def my_cleaner_noLemma_noStop(text):
 #Stopwords_endResult = []
 #def my_cleaner_lemma(text):
 #        return[token.lemma_ for token in nlp(text) if not (token.is_stop or token.lemma_ in Stopwords_endResult or token.is_alpha==False or len(token.lemma_) <3 ) ] #.is_alpha already excludes digits...
-
 
 #======================================================================== #
 ' BOW Vectorization; for classifiation input                         '

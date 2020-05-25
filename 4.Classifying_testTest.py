@@ -1,81 +1,67 @@
-####======================================================================== #
-###' following can be preloaded, before loop/gridsearch (uncomment 1st time then comment) '
-####======================================================================== #
-#import warnings
-#warnings.filterwarnings("ignore", category=UserWarning)
-#
-#import numpy as np
-#
-#import pickle
-#
-#import en_core_web_sm
-#nlp = en_core_web_sm.load(disable=["tagger", "parser", "ner"]) 
-##nlp.Defaults.stop_words |= {"soft","music",} #'|=' is to add several stopwords at once
-##Stopwords_endResult = list(nlp.Defaults.stop_words)
-###non lemma cleaner:
-#def my_cleaner_noLemma(text):
-#        return[token.lower_ for token in nlp(text) if not (token.is_stop or token.is_alpha==False or len(token.lemma_) <3 ) ] 
-#        
-#from sklearn.feature_extraction.text import CountVectorizer , TfidfVectorizer
-#import pandas as pd 
-#
-#
-#from gensim.test.utils import datapath, get_tmpfile
-#from gensim.models import KeyedVectors
-#from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014;
-#import time
-#
-## =============================================================================
-## #loading the word vectors models
-## =============================================================================
-##GLOVE
-#DIMENSION = '200'+'d'
-#GLOVE_FILE = datapath(f"C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.{DIMENSION}.txt")
-#WORD2VEC_GLOVE_FILE = get_tmpfile(f"glove.6B.{DIMENSION}.txt") # specify which d file is used here
-#glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
-##model:
-#gloveModel = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
-
-
-## Google news:
-#from gensim.models import KeyedVectors
-## Load vectors directly from the file
-#Google_model = KeyedVectors.load_word2vec_format('wordvecmodels\\GoogleNews-vectors-negative300.bin', binary=True)
-
-
-##BIG SELFTRAINED MODEL
-#with open('pickle\\selfTrainedWord2vec4BIG.pkl','rb') as f:  # Python 3: open(..., 'rb')
-#    selfTrainedw2vModel_big = pickle.load(f)
-#print(len(selfTrainedw2vModel_big.wv.vocab))
-#
-#
-#from sklearn.model_selection import train_test_split
-#from collections import Counter # calculating the label distribution:
-#from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
-#from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
-#from sklearn import svm        
-##
 ###======================================================================== #
-##' import the output of 1_preprocessing        '
+##' following can be preloaded, before loop/gridsearch (uncomment 1st time then comment) '
 ###======================================================================== #
-##THESE ARE WITH THE LABELS 0-1
-#with open('pickle\\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
-#    Xǀtranscripts, Yǀlabels,DF3_BINARIZEDLABELSΨLENADJUSTED,X_CONSONLY,X_NONCONSONLY = pickle.load(f)
-#print( len(Yǀlabels) , len(Xǀtranscripts) )
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
+import numpy as np
+
+import pickle
+
+import en_core_web_sm
+nlp = en_core_web_sm.load(disable=["tagger", "parser", "ner"]) 
+#nlp.Defaults.stop_words |= {"soft","music",} #'|=' is to add several stopwords at once
+#Stopwords_endResult = list(nlp.Defaults.stop_words)
+##non lemma cleaner:
+def my_cleaner_noLemma(text):
+        return[token.lower_ for token in nlp(text) if not (token.is_stop or token.is_alpha==False or len(token.lemma_) <3 ) ] 
+        
+from sklearn.feature_extraction.text import CountVectorizer , TfidfVectorizer
+import pandas as pd 
 
 
-#======================================================================== #
-''' TBD ↑ & TBE (to be experimented) experimenting:
+from gensim.test.utils import datapath, get_tmpfile
+from gensim.models import KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec#pretrained on wiki2014;
+import time
 
-- train the model only on the training data, thus vocabulary is only training terms; as this mirrors the real life situation?
+# =============================================================================
+# #loading the word vectors models
+# =============================================================================
+#GLOVE
+DIMENSION = '200'+'d'
+GLOVE_FILE = datapath(f"C:\\Users\\Sa\\Google_Drive\\0_Education\\1_Masters\\WD_jupyter\\wordVectors\\glove.6B.{DIMENSION}.txt")
+WORD2VEC_GLOVE_FILE = get_tmpfile(f"glove.6B.{DIMENSION}.txt") # specify which d file is used here
+glove2word2vec(GLOVE_FILE,WORD2VEC_GLOVE_FILE)
+#model:
+gloveModel = KeyedVectors.load_word2vec_format(WORD2VEC_GLOVE_FILE)
 
-- Try only to enrich unique neighbors
-- including the enrichment product hyper 
-- rare word need to be squared with max features
-- when rare words are too few in comparison to max features --> loop to next max feature
-- count the TP + TN for not having to do mental math
-- 
-'''
+
+# Google news:
+from gensim.models import KeyedVectors
+# Load vectors directly from the file
+Google_model = KeyedVectors.load_word2vec_format('wordvecmodels\\GoogleNews-vectors-negative300.bin', binary=True)
+
+
+#BIG SELFTRAINED MODEL
+with open('pickle\\selfTrainedWord2vec4BIG.pkl','rb') as f:  # Python 3: open(..., 'rb')
+    selfTrainedw2vModel_big = pickle.load(f)
+print(len(selfTrainedw2vModel_big.wv.vocab))
+
+
+from sklearn.model_selection import train_test_split
+from collections import Counter # calculating the label distribution:
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB, GaussianNB
+from sklearn import svm        
+#
+##======================================================================== #
+#' import the output of 1_preprocessing        '
+##======================================================================== #
+#THESE ARE WITH THE LABELS 0-1
+with open('pickle\\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
+    Xǀtranscripts, Yǀlabels,DF3_BINARIZEDLABELSΨLENADJUSTED,X_CONSONLY,X_NONCONSONLY = pickle.load(f)
+print( len(Yǀlabels) , len(Xǀtranscripts) )
 
 
 #======================================================================== #
@@ -89,7 +75,7 @@ print('WordvecModel_len',len(WordvecModel.wv.vocab))
 RatioHyper = 0.3
 
 #INCLUDES MULTIPLICATION WITH THE SIMILARITY
-SIMILARITY_HYPERPARA = 0#, 0.5, 0.6 , 0.7] # APT; the minium similarity of the neighbor, for it to be passed for check whether they are in vocabulary; LESS IMPORTANT SINCE THE ENRICHMENT EXPRESSION 
+SIMILARITY_HYPERPARA = 0# APT; the minium similarity of the neighbor, for it to be passed for check whether they are in vocabulary; LESS IMPORTANT SINCE THE ENRICHMENT EXPRESSION 
 TOP_NEIGHBORS=50 # close cousin of similarity_hyperparamater, the top x neighbors to be passed for check whether they are in the vocabulary
 
 # =============================================================================
@@ -150,25 +136,6 @@ elif a_dataset == 'test':
     df_X_ValǀTest = pd.DataFrame(x_vectesttest_array,columns=vectorizer.get_feature_names()) #test df
 
 
-
-
-#len(vectorizer.get_feature_names())
-#x_validate.shape
-#x_vectesttest_array.shape
-
-
-#======================================================================== #
-
-# looping through the specified gridsearch hyperparas:
-
-#if WordvecModel == selfTrainedw2vModel_small: # all for right name in file
-#    WORDVEC_TYPE = 'selfsmall'
-if WordvecModel == selfTrainedw2vModel_big:
-    WORDVEC_TYPE = 'selfBIG'
-elif WordvecModel == gloveModel:
-    WORDVEC_TYPE = 'Glove'
-elif WordvecModel == Google_model:
-    WORDVEC_TYPE = 'google'
 
                 
 # =============================================================================
@@ -407,6 +374,14 @@ print('max features', MAXFEATURE,'\n')
 #!!!======================================================================== #
 ' saving results and paras, somehow, function dont work if i load them, therefore just putting them here:      '
 #======================================================================== #
+# this is just for saving conveniences:
+if WordvecModel == selfTrainedw2vModel_big:
+    WORDVEC_TYPE = 'selfBIG'
+elif WordvecModel == gloveModel:
+    WORDVEC_TYPE = 'Glove'
+elif WordvecModel == Google_model:
+    WORDVEC_TYPE = 'google'
+    
 # function for storing the baseline results of the 2 clfs in pickle hereafter
 def paraPickleSaverBASE(clf):
     '''for the baseline tracks; both Nb & svm'''
