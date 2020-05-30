@@ -60,11 +60,23 @@ from sklearn import svm
 ##======================================================================== #
 #' import the output of 1_preprocessing        '
 ##======================================================================== #
-#THESE ARE WITH THE LABELS 0-1
+#PRE STRATIFICATION NEW DATASET
+#import pickle
+#with open('pickle\\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
+#    Xǀtranscripts, Yǀlabels,DF3_BINARIZEDLABELSΨLENADJUSTED,X_CONSONLY,X_NONCONSONLY = pickle.load(f)
+#print( len(Yǀlabels) , len(Xǀtranscripts) )
+
+
 import pickle
-with open('pickle\\output_1_importψpreprocessLABELS0-1;xyψdf3binarizedLenadjustedψxcons,noncons.pkl','rb') as f:  # Python 3: open(..., 'rb')
-    Xǀtranscripts, Yǀlabels,DF3_BINARIZEDLABELSΨLENADJUSTED,X_CONSONLY,X_NONCONSONLY = pickle.load(f)
-print( len(Yǀlabels) , len(Xǀtranscripts) )
+# cleaned_training, cleaned_test,y_train_after,y_test_after
+with open('pickle//theNewTestSplits_Binarized_with_Brackets.pkl','rb') as f:  # Python 3: open(..., 'rb')
+    X_TRAIN,Y_TRAIN,X_TEST,Y_TEST = pickle.load(f)
+
+# these will be used for the training + validation
+Xǀtranscripts = X_TRAIN
+Yǀlabels = Y_TRAIN
+
+    
 
 # =============================================================================
 # #hypers for classifying
@@ -82,10 +94,11 @@ START_TIME = time.time()
 
 #tNψtp_nb = []
 tNψtp = []
+
 # =============================================================================
-'splitting the  dataset:'
+'SPLITTING THE  DATASET:'
 # =============================================================================
-SEED_list = [1,2,3,4,7]
+SEED_list = [0]
 WordvecModel_list = [selfTrainedw2vModel_big]#, gloveModel]
 MAXFEATURE_list = [4000]
 # try this:
@@ -109,8 +122,15 @@ for SEED in SEED_list:
 #    SEED = 2 # used to be 7 # Note does not affact Test set, as there is nothing to split
     for WordvecModel in WordvecModel_list:
         for MAXFEATURE in MAXFEATURE_list:
+            
+            
+            
+            
+            
             for RatioHyper in RatioHyper_list:
                 x_train, x_validate, y_train, y_validate  = train_test_split(Xǀtranscripts, Yǀlabels, test_size=0.2, random_state=SEED, shuffle=True, stratify=Yǀlabels)
+    
+    
     
                 
                 
@@ -366,7 +386,7 @@ for SEED in SEED_list:
                 # # # Support Vector Machine
                 # =============================================================================
 #                C_list = []
-                for C in range(1,31):
+                for C in range(1,10):
 #                    print(c/10)
                     svm_classifier = svm.SVC(C=C/10,kernel='linear', degree=3,gamma='auto',probability=True)
                     svm_classifier.fit(x_train_tdm_array, y_train)
@@ -427,6 +447,10 @@ for SEED in SEED_list:
                     print('seed:',SEED, '\n max features', MAXFEATURE,'\n',WV_model, '\nratio',RatioHyper)
                     #print('svm C: ', svm_classifier.get_params()["C"])
                     
+                    
+                    
+                    
+                    
                     Total_iterations -= 1
                     print('\n\n *** total its left:',Total_iterations )
             
@@ -435,25 +459,40 @@ Columns = ['seed','clf', 'clf_Base', 'clf_enriched','alpha','C', 'RatioHyper','E
 aa_tNψtp = pd.DataFrame(tNψtp, columns = Columns)
 aa_tNψtp['diff'] = aa_tNψtp.clf_enriched - aa_tNψtp.clf_Base #adding difference between enriched and base (tp+tn)
 
-# correlation analysis among the columsn:
-df.loc[: , ['a' , 'c'] ] = df.apply(lambda x : pd.factorize(x)[0])+1 #first dummyvariable the categorial vars
-#from scipy.stats import chisquare
-aaa_df_correlation = aa_tNψtp.corr()
+
+# create a LIST of aggregated dfs; such that I dont need to enrich it again
+aggregated_dfs_list.append(((SEED,'svm',TNψfn_svm_base,TNψfn_svm_enriched,None, C , RatioHyper,Enriched_percentage, MAXFEATURE, MAX_DF, MIN_DF, WV_model),df_aggregated))
+#aggregated_dfs_list = []
+
+
 
 #exporting to csv
 from datetime import datetime
 TIME = datetime.now().strftime("_%d-%h-%H;%M;%S")
 aa_tNψtp.to_csv(f'{TIME}_resultsψcparamaters.csv')
-
-
-
-
 PATH = "C:\\Users\\Sa\\WD_thesisPython_workdrive\\Text_Classification_Pipeline\\"
 # here I could add in {} WHAT I want to SHOW UP IN FILENAME.. COEFS AND METRICS.. ?WRITE TO EXCEL FILE?
 with open(PATH+f'time={TIME}seed={SEED}.thesis', 'wb') as f:
     pickle.dump([aa_tNψtp],f)           
-            
+
+    
+    
+
 print("--- %s seconds ---" % (time.time() - START_TIME))
+
+
+
+
+
+# correlation analysis among the columsn:
+df.loc[: , ['a' , 'c'] ] = df.apply(lambda x : pd.factorize(x)[0])+1 #first dummyvariable the categorial vars
+#from scipy.stats import chisquare
+aaa_df_correlation = aa_tNψtp.corr()
+
+
+
+
+
 
 #    
 #    
