@@ -125,7 +125,9 @@ from gensim.models import Word2Vec
 
 import time
 START_TIME = time.time()
+
 modelW2V_selftrained = Word2Vec(lenfiltered, 
+                 #sg is 0 by default, meaning CBow will be used
                  min_count=3,   # Ignore words that appear less than this
                  size=200,      # Dimensionality of word embeddings
                  workers=2,     # Number of processors (parallelisation)
@@ -138,6 +140,9 @@ print(modelW2V_selftrained)
 
 print(modelW2V_selftrained.vector_size)
 print(len(modelW2V_selftrained.wv.vocab))
+
+
+
 
 
 #saving to disk
