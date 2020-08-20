@@ -6,7 +6,7 @@ update: may 24
 
 
 **__TBD:__**
-...
+- Make the code understandable for outsiders (perhaps apply object oriented programmming)
 
 __Info on the files within the repository:__
   - the files that are numbered are part of the text classification pipeline; their respective number is their place within that order. 
