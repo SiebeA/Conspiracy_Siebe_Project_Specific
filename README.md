@@ -1,4 +1,4 @@
-[link to markupt help!](https://guides.github.com/features/mastering-markdown/)
+[link to markupt help!](https://guides.github.com/features/mastering-markdown/) Now windows supported
 
 # Conspiracy_Siebe_Project_Specific
 
