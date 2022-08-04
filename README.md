@@ -1,19 +1,9 @@
-[link to markupt help!](https://guides.github.com/features/mastering-markdown/) Now windows supported
-
-# Conspiracy_Siebe_Project_Specific
-
-update: may 24
+## The abstract of the research project to which this code belongs:
+ The present research investigates the effect of feature enrichment by word vector models for text classification with the BOW representation, on a small and unbalanced dataset. The classification problem involved a binary classification task on a dataset of 424 transcripts that had a label distribution of 0: non-conspiratorial (~80%), and 1: conspiratorial (~20%). The method by which the feature enrichment was executed was by using word vector models with the support vector machine a multi-nominal naïve Bayes classifiers. In total, four word vector models were used for feature enrichment: a  (larger generic) GloVe model trained on Wikipedia 2014 (vocabulary of 400k); and a (smaller domain-specific) self-trained word vector model was trained on a corpus of conspiracy comments between 2015 and 2019 (vocabulary of 213k). All four models that used feature enrichment with the word vector models outperformed the baseline; both the Reddit conspiracy word vector models outperformed the GloVe word vector models. The highest result was by the Reddit conspiracy SVM model, the highest increase in performance relative to its baseline was by the Reddit MNB model.
 
 
-**__TBD:__**
-- Make the code understandable for outsiders (perhaps apply object oriented programmming)
-
-__Info on the files within the repository:__
-  - the files that are numbered are part of the text classification pipeline; their respective number is their place within that order. 
-    - the files startin with 'FE'='feature_Enrichment are the core of the feature_engineering process; eventually, their output models will also be input in the TextPipeline from step 3
     
 - files without a number are not direclty relevant fort the pipeline (pickle, readme, etc)
-  
  
 | __file/step__                    | __State__   | __comments__        |
 | -------------                     |:-------------:| ------      |
